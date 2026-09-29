@@ -1,0 +1,66 @@
+{
+  "version": 1,
+  "updated_at": "2026-09-29T05:15:00Z",
+  "policy": {
+    "quality_bar": "high",
+    "min_runs": 2,
+    "confidence_levels": {
+      "high": "PASS >= 0.9 on rubric AND human/agent review note AND ≥2 arena runs",
+      "provisional": "promising for task type; awaiting arena evaluation for high promotion",
+      "medium": "PASS >= 0.7 or preliminary positive signal",
+      "low": "exploratory; not yet reliable"
+    }
+  },
+  "entries": [
+    {
+      "harness": "opencode",
+      "model": "ollama/qwen2.5:3b-instruct",
+      "task_types": [
+        {
+          "id": "tiny_code_snippet",
+          "confidence": "provisional",
+          "evidence": [],
+          "notes": "Single small file with clear spec (e.g., hello.py + SOLUTION.md). Awaiting ≥2 arena runs + judgment for high promotion."
+        },
+        {
+          "id": "explain_simple",
+          "confidence": "provisional",
+          "evidence": [],
+          "notes": "Short concept explanations, ELI5 style. Awaiting ≥2 arena runs + judgment for high promotion."
+        },
+        {
+          "id": "rewrite_short_prose",
+          "confidence": "medium",
+          "evidence": [],
+          "notes": "Short text rewrites ≤400 words. Needs more evaluation runs."
+        },
+        {
+          "id": "classify_label",
+          "confidence": "medium",
+          "evidence": [],
+          "notes": "Closed-set classification tasks. Needs validation."
+        },
+        {
+          "id": "extract_structured",
+          "confidence": "medium",
+          "evidence": [],
+          "notes": "Extract JSON/YAML from short text. Needs validation."
+        },
+        {
+          "id": "unit_test_stub",
+          "confidence": "low",
+          "evidence": [],
+          "notes": "Generate simple test stubs. Exploratory."
+        }
+      ],
+      "not_suitable": [
+        "multi_file_refactor",
+        "long_context_research",
+        "security_review",
+        "architecture_design",
+        "complex_debugging",
+        "tool_heavy_agent_loops"
+      ]
+    }
+  ]
+}
