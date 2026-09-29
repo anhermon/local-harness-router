@@ -36,7 +36,8 @@ jobs:
       run: node -e "import('./src/capabilities.js').then(m => m.loadConfig()).then(() => console.log('✓ config.yaml valid'))"
     
     - name: Test CLI dry-run (expects rejection until evidence promoted)
-      run: node src/cli.js "Write a hello world function" --dry-run || echo "Expected: no high-confidence routes until evidence added"
+      run: |
+        node src/cli.js "Write a hello world function" --dry-run || echo "Expected: no high-confidence routes until evidence added"
     
     - name: Verify CAPABILITIES.md is up to date
       run: |
