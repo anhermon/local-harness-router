@@ -6,6 +6,21 @@
 
 `local-harness-router` maintains a living capability map of `{harness, model} → task types` that local LLMs can perform at high quality. It routes prompts to the most suitable local harness:model pair based on evidence from harness-arena evaluation runs.
 
+## Related Work
+
+Several excellent open-source tools route LLM requests, but they solve a **different problem**:
+
+- **[LiteLLM](https://github.com/BerriAI/litellm)** (including Auto Router), **[RouteLLM](https://github.com/lm-sys/RouteLLM)**, and similar routers optimize **model selection** for cost, latency, or load-balancing across providers/GPUs.
+- **[Continue](https://github.com/continuedev/continue)**, **[Aider](https://github.com/paul-gauthier/aider)**, and related IDE tools let users pick a model, but the routing is **manual or model-centric**.
+
+`local-harness-router` addresses a complementary problem: **which harness×model combination** can reliably handle a given task type? The same model behaves differently under different harnesses (see [dogfood evidence](evidence/2026-09-29-dogfood.md) showing `qwen2.5:3b-instruct` succeeds under `opencode` but degrades under `little-coder` for the same task). This project:
+
+- Maps **harness×model pairs** to task types, not just models to latency/cost.
+- Routes based on **evidence** from harness-arena evaluation runs (PASS ≥ 0.9 + manual quality checks).
+- Supports **reject-by-default** fallback (no API keys required) or opt-in frontier providers for out-of-scope tasks.
+
+If you need **model cost/latency routing**, use LiteLLM or RouteLLM. If you need **evidence-backed harness×model→task routing** for local LLMs with a quality bar, use this project. They're not redundant.
+
 ## Quick Start
 
 ### Installation
