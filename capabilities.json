@@ -1,9 +1,17 @@
 {
   "version": 1,
-  "updated_at": "2026-09-29T05:15:00Z",
+  "updated_at": "2026-09-29T08:36:00+03:00",
+  "source": "dogfood-evidence",
+  "arena": {
+    "url": "http://127.0.0.1:5188",
+    "runs_dir": "/workspace/harness-arena-working/runs-dogfood",
+    "checkout": "/workspace/harness-arena-working@a03fe02"
+  },
   "policy": {
     "quality_bar": "high",
     "min_runs": 2,
+    "require_manual_or_objective_check": true,
+    "confidence_for_auto_route": "high",
     "confidence_levels": {
       "high": "PASS >= 0.9 on rubric AND human/agent review note AND ≥2 arena runs",
       "provisional": "promising for task type; awaiting arena evaluation for high promotion",
@@ -18,49 +26,68 @@
       "task_types": [
         {
           "id": "tiny_code_snippet",
-          "confidence": "provisional",
-          "evidence": [],
-          "notes": "Single small file with clear spec (e.g., hello.py + SOLUTION.md). Awaiting ≥2 arena runs + judgment for high promotion."
-        },
-        {
-          "id": "explain_simple",
-          "confidence": "provisional",
-          "evidence": [],
-          "notes": "Short concept explanations, ELI5 style. Awaiting ≥2 arena runs + judgment for high promotion."
-        },
-        {
-          "id": "rewrite_short_prose",
-          "confidence": "medium",
-          "evidence": [],
-          "notes": "Short text rewrites ≤400 words. Needs more evaluation runs."
-        },
-        {
-          "id": "classify_label",
-          "confidence": "medium",
-          "evidence": [],
-          "notes": "Closed-set classification tasks. Needs validation."
+          "confidence": "high",
+          "evidence": [
+            "20260928-231055",
+            "20260929-081437"
+          ],
+          "notes": "Single small file (e.g. hello.py) + SOLUTION.md. Code usable; SOLUTION.md often formulaic. Prefer -t code."
         },
         {
           "id": "extract_structured",
-          "confidence": "medium",
-          "evidence": [],
-          "notes": "Extract JSON/YAML from short text. Needs validation."
+          "confidence": "high",
+          "evidence": [
+            "20260929-081619",
+            "20260929-083323"
+          ],
+          "notes": "Short text → named result.json with strict schema; no markdown fences. Use code task type, not creative/output.md. Occasional hang after JSON write (see 20260929-082813) — keep prompts tiny."
         },
         {
-          "id": "unit_test_stub",
-          "confidence": "low",
-          "evidence": [],
-          "notes": "Generate simple test stubs. Exploratory."
+          "id": "rewrite_short_prose",
+          "confidence": "high",
+          "evidence": [
+            "20260929-082405",
+            "20260929-083411"
+          ],
+          "notes": "≤~40 word rewrite into rewrite.md + SOLUTION.md. Name the content file explicitly; do not rely on SOLUTION.md alone."
         }
       ],
       "not_suitable": [
+        "classify_label",
+        "explain_simple",
+        "unit_test_stub",
         "multi_file_refactor",
         "long_context_research",
         "security_review",
-        "architecture_design",
-        "complex_debugging",
-        "tool_heavy_agent_loops"
+        "architecture",
+        "tool_heavy_agent_loops",
+        "creative_json_only_output_md"
       ]
+    },
+    {
+      "harness": "little-coder",
+      "model": "ollama/qwen2.5:3b-instruct",
+      "task_types": [],
+      "not_suitable": [
+        "tiny_code_snippet",
+        "extract_structured",
+        "classify_label",
+        "rewrite_short_prose",
+        "explain_simple",
+        "unit_test_stub",
+        "*"
+      ],
+      "notes": "Discovers in ./arena models but dogfood cell degraded with empty {} response. Do not route here until a PASS+usable run exists."
+    },
+    {
+      "harness": "opencode",
+      "model": "ollama/qwen2.5:0.5b",
+      "task_types": [],
+      "not_suitable": [
+        "tiny_code_snippet",
+        "*"
+      ],
+      "notes": "Too small for arena contract + tool loop; do not route."
     }
   ]
 }

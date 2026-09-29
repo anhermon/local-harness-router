@@ -84,6 +84,15 @@ All capability claims require:
 - **PASS ≥ 0.9** on harness-arena rubric
 - **≥2 independent arena runs**
 - **Human/agent review note** in `evidence/`
+- **Manual or objective verification** that artifacts are actually usable
+
+**Important:** Arena skeleton PASS (e.g., `SOLUTION.md` exists) is insufficient alone. Several FAIL-quality cells can still achieve PASS 1.00 on skeleton checks. The Dogfooding team always performs manual or objective post-checks before promoting to `high` confidence.
+
+Confidence levels:
+- **high**: PASS ≥ 0.9, ≥2 runs, verified usable artifacts
+- **provisional**: promising but awaiting full arena evaluation
+- **medium**: PASS ≥ 0.7 or preliminary positive signal
+- **low**: exploratory; not yet reliable
 
 Evidence links are maintained by the Dogfooding team through harness-arena evaluation runs. See `evidence/README.md` for details.
 
