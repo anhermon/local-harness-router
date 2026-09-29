@@ -9,7 +9,8 @@
 - **Quality Bar**: high
 - **Minimum Runs**: 2
 - **Confidence Levels**:
-  - **high**: PASS >= 0.9 on rubric AND human/agent review note
+  - **high**: PASS >= 0.9 on rubric AND human/agent review note AND ≥2 arena runs
+  - **provisional**: promising for task type; awaiting arena evaluation for high promotion
   - **medium**: PASS >= 0.7 or preliminary positive signal
   - **low**: exploratory; not yet reliable
 
@@ -21,8 +22,8 @@
 
 | Task Type | Confidence | Evidence | Notes |
 |-----------|------------|----------|-------|
-| `tiny_code_snippet` | high | ⏳ pending | Single small file with clear spec (e.g., hello.py + SOLUTION.md). Evidence pending harness-arena dogfooding. |
-| `explain_simple` | high | ⏳ pending | Short concept explanations, ELI5 style. Evidence pending harness-arena dogfooding. |
+| `tiny_code_snippet` | provisional | ⏳ pending | Single small file with clear spec (e.g., hello.py + SOLUTION.md). Awaiting ≥2 arena runs + judgment for high promotion. |
+| `explain_simple` | provisional | ⏳ pending | Short concept explanations, ELI5 style. Awaiting ≥2 arena runs + judgment for high promotion. |
 | `rewrite_short_prose` | medium | ⏳ pending | Short text rewrites ≤400 words. Needs more evaluation runs. |
 | `classify_label` | medium | ⏳ pending | Closed-set classification tasks. Needs validation. |
 | `extract_structured` | medium | ⏳ pending | Extract JSON/YAML from short text. Needs validation. |

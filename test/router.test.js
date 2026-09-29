@@ -11,6 +11,7 @@ const mockCapabilities = {
     min_runs: 2,
     confidence_levels: {
       high: 'test',
+      provisional: 'test',
       medium: 'test',
       low: 'test'
     }
@@ -24,13 +25,13 @@ const mockCapabilities = {
           id: 'tiny_code_snippet',
           confidence: 'high',
           evidence: ['run-001', 'run-002'],
-          notes: 'Test note'
+          notes: 'Test note with evidence'
         },
         {
           id: 'explain_simple',
-          confidence: 'high',
+          confidence: 'provisional',
           evidence: [],
-          notes: 'Pending'
+          notes: 'Pending evidence'
         },
         {
           id: 'rewrite_short_prose',
@@ -76,16 +77,17 @@ test('findRouteForTaskType - returns null for unknown task type', () => {
 test('getTaskTypesByConfidence - filters by confidence', () => {
   const highTasks = getTaskTypesByConfidence(mockCapabilities, 'high');
   
-  assert.ok(highTasks.length >= 2, 'Should have at least 2 high confidence tasks');
+  assert.ok(highTasks.length >= 1, 'Should have at least 1 high confidence task');
   assert.ok(highTasks.every(t => t.confidence === 'high'), 'All tasks should be high confidence');
 });
 
 test('getTaskTypesByConfidence - includes medium when threshold is medium', () => {
   const mediumTasks = getTaskTypesByConfidence(mockCapabilities, 'medium');
   
-  assert.ok(mediumTasks.length >= 3, 'Should include high and medium tasks');
+  assert.ok(mediumTasks.length >= 2, 'Should include high, provisional and medium tasks');
   assert.ok(mediumTasks.some(t => t.confidence === 'medium'), 'Should include medium tasks');
   assert.ok(mediumTasks.some(t => t.confidence === 'high'), 'Should include high tasks');
+  assert.ok(mediumTasks.some(t => t.confidence === 'provisional'), 'Should include provisional tasks');
 });
 
 test('isNotSuitable - identifies unsuitable tasks', () => {

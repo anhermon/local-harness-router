@@ -5,7 +5,8 @@
     "quality_bar": "high",
     "min_runs": 2,
     "confidence_levels": {
-      "high": "PASS >= 0.9 on rubric AND human/agent review note",
+      "high": "PASS >= 0.9 on rubric AND human/agent review note AND ≥2 arena runs",
+      "provisional": "promising for task type; awaiting arena evaluation for high promotion",
       "medium": "PASS >= 0.7 or preliminary positive signal",
       "low": "exploratory; not yet reliable"
     }
@@ -17,15 +18,15 @@
       "task_types": [
         {
           "id": "tiny_code_snippet",
-          "confidence": "high",
+          "confidence": "provisional",
           "evidence": [],
-          "notes": "Single small file with clear spec (e.g., hello.py + SOLUTION.md). Evidence pending harness-arena dogfooding."
+          "notes": "Single small file with clear spec (e.g., hello.py + SOLUTION.md). Awaiting ≥2 arena runs + judgment for high promotion."
         },
         {
           "id": "explain_simple",
-          "confidence": "high",
+          "confidence": "provisional",
           "evidence": [],
-          "notes": "Short concept explanations, ELI5 style. Evidence pending harness-arena dogfooding."
+          "notes": "Short concept explanations, ELI5 style. Awaiting ≥2 arena runs + judgment for high promotion."
         },
         {
           "id": "rewrite_short_prose",

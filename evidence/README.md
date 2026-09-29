@@ -8,11 +8,16 @@ The capability map (`capabilities.yaml`) is the source of truth for which `{harn
 
 ## Quality Bar for Promotion
 
+**IMPORTANT**: `confidence: high` requires evidence. Do not mark entries as `high` with empty evidence arrays.
+
 To promote a task type to `high` confidence in `capabilities.yaml`:
 
 1. **PASS ≥ 0.9** on the harness-arena rubric
 2. **≥2 independent arena runs** (different prompts or dates)
 3. **Human/agent review note** filed in this directory
+4. **Add run IDs** to the `evidence: [...]` array
+
+Use `provisional` confidence for promising task types that haven't been evaluated yet. Use `medium` for preliminary positive signals or PASS ≥ 0.7. Use `low` for exploratory work.
 
 ## Workflow (Dogfooding Team)
 
