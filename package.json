@@ -1,0 +1,29 @@
+{
+  "name": "local-harness-router",
+  "version": "0.1.0",
+  "description": "Capability map + CLI: route prompts to local harness:model pairs",
+  "type": "module",
+  "main": "src/router.js",
+  "bin": {
+    "local-route": "./src/cli.js"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "render-capabilities": "node src/render-capabilities.js"
+  },
+  "keywords": [
+    "llm",
+    "router",
+    "local",
+    "harness",
+    "ollama"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "yaml": "^2.9.1"
+  }
+}

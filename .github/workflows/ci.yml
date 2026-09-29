@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, cursor/** ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x, 22.x]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run tests
+      run: npm test
+    
+    - name: Verify capabilities.yaml loads
+      run: node -e "import('./src/capabilities.js').then(m => m.loadCapabilities()).then(() => console.log('✓ capabilities.yaml valid'))"
+    
+    - name: Verify config.yaml loads
+      run: node -e "import('./src/capabilities.js').then(m => m.loadConfig()).then(() => console.log('✓ config.yaml valid'))"
+    
+    - name: Test CLI dry-run
+      run: node src/cli.js "Write a hello world function" --dry-run
+    
+    - name: Verify CAPABILITIES.md is up to date
+      run: |
+        npm run render-capabilities
+        if ! git diff --quiet CAPABILITIES.md capabilities.json; then
+          echo "Error: CAPABILITIES.md or capabilities.json is out of date"
+          echo "Run 'npm run render-capabilities' and commit the changes"
+          git diff CAPABILITIES.md capabilities.json
+          exit 1
+        fi
+
+  lint-yaml:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Validate YAML files
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Check YAML syntax
+      run: |
+        node -e "
+        import('yaml').then(yaml => {
+          const fs = require('fs');
+          const files = ['capabilities.yaml', 'config.yaml'];
+          for (const file of files) {
+            try {
+              yaml.parse(fs.readFileSync(file, 'utf8'));
+              console.log('✓', file, 'is valid YAML');
+            } catch (err) {
+              console.error('✗', file, 'has YAML syntax errors:', err.message);
+              process.exit(1);
+            }
+          }
+        });
+        "

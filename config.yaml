@@ -1,0 +1,29 @@
+# local-harness-router configuration
+
+# Fallback behavior when no suitable local harness:model is found
+# Options: reject (fail fast) | frontier (route to Claude/GPT if credentials present)
+fallback: reject
+
+# Minimum confidence level required for auto-routing
+# Options: high | medium | low
+require_confidence: high
+
+# Frontier provider fallback (opt-in only; requires API keys)
+frontier:
+  enabled: false
+  # provider: openai  # or anthropic
+  # model: gpt-4      # or claude-3-opus
+  # Requires OPENAI_API_KEY or ANTHROPIC_API_KEY in environment
+
+# harness-arena integration settings
+arena:
+  url: http://127.0.0.1:5188
+  runs_dir: ./runs
+  # Invoke via: ./arena run --harness <harness> --model <model> --task <task>
+
+# Router behavior
+router:
+  # Enable basic heuristic task-type classification from prompts
+  auto_classify: true
+  # Log routing decisions for analysis
+  log_decisions: true
