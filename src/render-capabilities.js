@@ -17,8 +17,9 @@ async function renderCapabilities() {
   // Build markdown
   let md = '# Capability Map\n\n';
   md += `**Last Updated**: ${capabilities.updated_at}\n\n`;
-  md += '**NOTE**: Evidence entries marked as empty `[]` are pending harness-arena dogfooding runs. ';
-  md += 'The Dogfooding team will promote evidence after arena evaluations meet the quality bar (PASS ≥ 0.9, ≥2 runs, human review).\n\n';
+  md += '**NOTE**: Promoted task-type rows cite harness-arena run IDs (dogfood evidence from PR #2). ';
+  md += 'Rows without evidence render as pending. Further promotions still require the quality bar ';
+  md += '(PASS ≥ 0.9, ≥2 runs, human review).\n\n';
   
   md += '## Quality Policy\n\n';
   md += `- **Quality Bar**: ${capabilities.policy.quality_bar}\n`;

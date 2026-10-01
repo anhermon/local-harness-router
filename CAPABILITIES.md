@@ -2,7 +2,7 @@
 
 **Last Updated**: 2026-09-29T08:36:00+03:00
 
-**NOTE**: Evidence entries marked as empty `[]` are pending harness-arena dogfooding runs. The Dogfooding team will promote evidence after arena evaluations meet the quality bar (PASS ≥ 0.9, ≥2 runs, human review).
+**NOTE**: Promoted task-type rows cite harness-arena run IDs (dogfood evidence from PR #2). Rows without evidence render as pending. Further promotions still require the quality bar (PASS ≥ 0.9, ≥2 runs, human review).
 
 ## Quality Policy
 
