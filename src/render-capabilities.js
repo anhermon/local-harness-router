@@ -8,6 +8,10 @@ import YAML from 'yaml';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = join(__dirname, '..');
 
+function oneLine(text) {
+  return String(text || '').replace(/\s+/g, ' ').trim();
+}
+
 async function renderCapabilities() {
   // Load capabilities
   const capabilitiesPath = join(ROOT_DIR, 'capabilities.yaml');
@@ -17,9 +21,11 @@ async function renderCapabilities() {
   // Build markdown
   let md = '# Capability Map\n\n';
   md += `**Last Updated**: ${capabilities.updated_at}\n\n`;
-  md += '**NOTE**: Promoted task-type rows cite harness-arena run IDs (dogfood evidence from PR #2). ';
-  md += 'Rows without evidence render as pending. Further promotions still require the quality bar ';
-  md += '(PASS ≥ 0.9, ≥2 runs, human review).\n\n';
+  md += '**NOTE**: Promoted / provisional task-type rows cite harness-arena run IDs ';
+  md += '(dogfood evidence; see `evidence/`). Rows without evidence render as pending. ';
+  md += 'Further **high** promotions still require the quality bar ';
+  md += '(PASS ≥ 0.9, ≥2 runs, human review, objective check). ';
+  md += '`provisional` = promote-with-notes (not auto-routed at `require_confidence: high`).\n\n';
   
   md += '## Quality Policy\n\n';
   md += `- **Quality Bar**: ${capabilities.policy.quality_bar}\n`;
@@ -34,17 +40,22 @@ async function renderCapabilities() {
   
   for (const entry of capabilities.entries) {
     md += `### ${entry.harness}:${entry.model}\n\n`;
+
+    if (entry.notes) {
+      md += `${oneLine(entry.notes)}\n\n`;
+    }
     
-    if (entry.task_types.length > 0) {
+    if (entry.task_types && entry.task_types.length > 0) {
       md += '#### Task Types\n\n';
       md += '| Task Type | Confidence | Evidence | Notes |\n';
       md += '|-----------|------------|----------|-------|\n';
       
       for (const tt of entry.task_types) {
-        const evidenceCell = tt.evidence.length > 0 
-          ? tt.evidence.map(e => `[${e}](../runs/${e})`).join(', ')
+        const evidence = Array.isArray(tt.evidence) ? tt.evidence : [];
+        const evidenceCell = evidence.length > 0 
+          ? evidence.map(e => `[${e}](../runs/${e})`).join(', ')
           : '⏳ pending';
-        const notesCell = tt.notes || '';
+        const notesCell = oneLine(tt.notes);
         md += `| \`${tt.id}\` | ${tt.confidence} | ${evidenceCell} | ${notesCell} |\n`;
       }
       md += '\n';
@@ -62,7 +73,7 @@ async function renderCapabilities() {
   
   const allTaskTypes = new Set();
   for (const entry of capabilities.entries) {
-    for (const tt of entry.task_types) {
+    for (const tt of entry.task_types || []) {
       allTaskTypes.add(tt.id);
     }
   }

@@ -13,7 +13,7 @@ Several excellent open-source tools route LLM requests, but they solve a **diffe
 - **[LiteLLM](https://github.com/BerriAI/litellm)** (including Auto Router), **[RouteLLM](https://github.com/lm-sys/RouteLLM)**, and similar routers optimize **model selection** for cost, latency, or load-balancing across providers/GPUs.
 - **[Continue](https://github.com/continuedev/continue)**, **[Aider](https://github.com/paul-gauthier/aider)**, and related IDE tools let users pick a model, but the routing is **manual or model-centric**.
 
-`local-harness-router` addresses a complementary problem: **which harness×model combination** can reliably handle a given task type? The same model behaves differently under different harnesses (see [dogfood evidence](evidence/2026-09-29-dogfood.md) showing `qwen2.5:3b-instruct` succeeds under `opencode` but degrades under `little-coder` for the same task). This project:
+`local-harness-router` addresses a complementary problem: **which harness×model combination** can reliably handle a given task type? The same model behaves differently under different harnesses (see [dogfood evidence](evidence/2026-09-29-dogfood.md) and [lean-prompt rebench](evidence/2026-10-01-lean-rebench.md): `qwen2.5:3b-instruct` is proven under default `opencode`; `little-coder` is only a **provisional** lean-prompt candidate with hang caveats). This project:
 
 - Maps **harness×model pairs** to task types, not just models to latency/cost.
 - Routes based on **evidence** from harness-arena evaluation runs (PASS ≥ 0.9 + manual quality checks).

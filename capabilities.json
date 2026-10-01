@@ -1,11 +1,11 @@
 {
   "version": 1,
-  "updated_at": "2026-09-29T08:36:00+03:00",
+  "updated_at": "2026-10-01T15:19:00+03:00",
   "source": "dogfood-evidence",
   "arena": {
     "url": "http://127.0.0.1:5188",
-    "runs_dir": "/workspace/harness-arena-working/runs-dogfood",
-    "checkout": "/workspace/harness-arena-working@a03fe02"
+    "runs_dir": "/workspace/harness-arena-daily-driver/runs",
+    "checkout": "harness-arena@834d891"
   },
   "policy": {
     "quality_bar": "high",
@@ -29,9 +29,10 @@
           "confidence": "high",
           "evidence": [
             "20260928-231055",
-            "20260929-081437"
+            "20260929-081437",
+            "20261001-151648"
           ],
-          "notes": "Single small file (e.g. hello.py) + SOLUTION.md. Code usable; SOLUTION.md often formulaic. Prefer -t code."
+          "notes": "Single small file (e.g. hello.py) + SOLUTION.md. Code usable; SOLUTION.md often formulaic. Prefer -t code. Default (non-lean) path reconfirmed PASS on harness-arena@834d891 (20261001-151648). Do NOT force --lean-prompt on this cell — lean regresses it."
         },
         {
           "id": "extract_structured",
@@ -62,22 +63,55 @@
         "architecture",
         "tool_heavy_agent_loops",
         "creative_json_only_output_md"
-      ]
+      ],
+      "notes": "Proven daily path without lean-prompt. KEEP_OFF for opencode+lean (20261001-151618): degraded, garbage text, no tools/files — worse than default. Leave default routing alone; never force --lean-prompt here."
     },
     {
       "harness": "little-coder",
       "model": "ollama/qwen2.5:3b-instruct",
-      "task_types": [],
+      "task_types": [
+        {
+          "id": "tiny_code_snippet",
+          "confidence": "provisional",
+          "evidence": [
+            "20261001-145407"
+          ],
+          "notes": "PROMOTE_CANDIDATE only with lean-prompt (or equivalent short system + LITTLE_CODER_PROJECT_CONTEXT=0). First objective PASS on this box (was empty {}). Caveats: hang-after-write (need timeout/SIGKILL); hello.py may have extra \\n; large stdout (~56 MiB). Gate on timeout + objective check (arena-daily check), not skeleton PASS. Not high: n=1 and ops hang risk. Without lean: still empty {} / do not route."
+        }
+      ],
       "not_suitable": [
-        "tiny_code_snippet",
         "extract_structured",
         "classify_label",
         "rewrite_short_prose",
         "explain_simple",
         "unit_test_stub",
+        "multi_file_refactor",
+        "long_context_research",
+        "security_review",
+        "architecture",
+        "tool_heavy_agent_loops"
+      ],
+      "notes": "Lean-only provisional candidate for tiny_code_snippet (run 20261001-145407, harness-arena@834d891). Default (non-lean) LC still unusable. Require ARENA_ALLOW_LITTLE_CODER=1 + --lean-prompt; enforce run timeout and objective check before treating as success."
+    },
+    {
+      "harness": "pi",
+      "model": "ollama/qwen2.5:3b-instruct",
+      "task_types": [],
+      "not_suitable": [
+        "tiny_code_snippet",
         "*"
       ],
-      "notes": "Discovers in ./arena models but dogfood cell degraded with empty {} response. Do not route here until a PASS+usable run exists."
+      "notes": "KEEP_OFF / do not promote. Even with --lean-prompt (20261001-151107): hello.py/SOLUTION.md landed on run root, not cell cwd; objective FAIL; hung → SIGTERM. Not promotable until writes stay in cell cwd and exit cleanly."
+    },
+    {
+      "harness": "opencode",
+      "model": "ollama/qwen3.5:4b@none",
+      "task_types": [],
+      "not_suitable": [
+        "tiny_code_snippet",
+        "*"
+      ],
+      "notes": "KEEP_OFF / do not promote (unchanged). Prior recheck 20261001-075532: degraded, no files, tool-as-text. Not re-run in lean rebench."
     },
     {
       "harness": "opencode",
