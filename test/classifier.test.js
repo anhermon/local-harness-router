@@ -114,3 +114,47 @@ test('classifyPrompt is deterministic', () => {
   const allSame = results.every(r => r === results[0]);
   assert.ok(allSame, 'Classification should be deterministic');
 });
+
+test('classifyPrompt - rewrite is not tiny_code via write substring', () => {
+  const prompts = [
+    'Rewrite this paragraph into rewrite.md',
+    'rewrite the text to be clearer',
+    'Please rewrite this short prose for tone'
+  ];
+
+  for (const prompt of prompts) {
+    const result = classifyPrompt(prompt);
+    assert.strictEqual(result, 'rewrite_short_prose', `Expected rewrite_short_prose for: ${prompt}`);
+  }
+});
+
+test('classifyPrompt - js does not match inside json', () => {
+  // "json" must not fire tiny_code's codeKeyword "js"
+  const prompt = 'Extract the name and email from this text as JSON';
+  assert.strictEqual(classifyPrompt(prompt), 'extract_structured');
+
+  // Prompt with write + json should not get a false js code-keyword boost
+  // from the substring inside "json" (still tiny_code via "write", but
+  // explanation must not list js).
+  const writeJson = 'Write the answer as json only';
+  assert.strictEqual(classifyPrompt(writeJson), 'tiny_code_snippet');
+  const explanation = explainClassification(writeJson, 'tiny_code_snippet');
+  assert.ok(!/\bjs\b/.test(explanation), `should not list js from json: ${explanation}`);
+});
+
+test('classifyPrompt - rewrite preferred over bare write when both present', () => {
+  // Both patterns can match; longer keyword "rewrite" should win
+  const prompt = 'Rewrite this and write it more clearly';
+  const result = classifyPrompt(prompt);
+  assert.strictEqual(result, 'rewrite_short_prose');
+});
+
+test('containsKeyword respects word boundaries', async () => {
+  const { containsKeyword } = await import('../src/classifier.js');
+  assert.strictEqual(containsKeyword('rewrite.md please', 'write'), false);
+  assert.strictEqual(containsKeyword('please rewrite this', 'rewrite'), true);
+  assert.strictEqual(containsKeyword('write SOLUTION.md', 'write'), true);
+  assert.strictEqual(containsKeyword('return as json', 'js'), false);
+  assert.strictEqual(containsKeyword('a js function', 'js'), true);
+  assert.strictEqual(containsKeyword('use c++ here', 'c++'), true);
+});
