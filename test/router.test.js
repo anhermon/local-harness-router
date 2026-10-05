@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert';
-import { findRouteForTaskType, getTaskTypesByConfidence, isNotSuitable } from '../src/capabilities.js';
+import { findRouteForTaskType, getTaskTypesByConfidence, isNotSuitable, CONFIDENCE_RANK } from '../src/capabilities.js';
 
 // Mock capabilities for testing - matches dogfood promotion
 const mockCapabilities = {
@@ -112,4 +112,88 @@ test('isNotSuitable - identifies unsuitable tasks', () => {
   assert.ok(!isNotSuitable(mockCapabilities, 'tiny_code_snippet'), 'Should not mark tiny_code_snippet as not suitable');
   assert.ok(!isNotSuitable(mockCapabilities, 'extract_structured'), 'Should not mark extract_structured as not suitable');
   assert.ok(!isNotSuitable(mockCapabilities, 'rewrite_short_prose'), 'Should not mark rewrite_short_prose as not suitable');
+});
+
+// Dogfooding 2026-10-05: with require_confidence=medium, tiny_code must prefer
+// evidence-backed opencode (medium) over little-coder (provisional).
+const dogfoodMediumVsProvisional = {
+  version: 1,
+  updated_at: '2026-10-05T09:15:00+03:00',
+  policy: {
+    quality_bar: 'high',
+    min_runs: 2,
+    confidence_levels: {
+      high: 'test',
+      medium: 'test',
+      provisional: 'test',
+      low: 'test'
+    }
+  },
+  entries: [
+    {
+      harness: 'opencode',
+      model: 'ollama/qwen2.5:3b-instruct',
+      task_types: [
+        {
+          id: 'tiny_code_snippet',
+          confidence: 'medium',
+          evidence: ['20261005-090323', '20261005-085227'],
+          notes: 'Demoted high→medium; evidence-backed'
+        }
+      ],
+      not_suitable: ['extract_structured', 'rewrite_short_prose']
+    },
+    {
+      harness: 'little-coder',
+      model: 'ollama/qwen2.5:3b-instruct',
+      task_types: [
+        {
+          id: 'tiny_code_snippet',
+          confidence: 'provisional',
+          evidence: ['20261001-145407'],
+          notes: 'Lean-only provisional; awaiting evaluation'
+        }
+      ],
+      not_suitable: []
+    }
+  ]
+};
+
+test('CONFIDENCE_RANK - medium outranks provisional', () => {
+  assert.ok(CONFIDENCE_RANK.high > CONFIDENCE_RANK.medium);
+  assert.ok(CONFIDENCE_RANK.medium > CONFIDENCE_RANK.provisional);
+  assert.ok(CONFIDENCE_RANK.provisional > CONFIDENCE_RANK.low);
+});
+
+test('findRouteForTaskType - medium with evidence outranks provisional at medium threshold', () => {
+  const route = findRouteForTaskType(dogfoodMediumVsProvisional, 'tiny_code_snippet', 'medium');
+
+  assert.ok(route, 'Should find a route at medium threshold');
+  assert.strictEqual(route.harness, 'opencode', 'Evidence-backed medium must beat provisional little-coder');
+  assert.strictEqual(route.model, 'ollama/qwen2.5:3b-instruct');
+  assert.strictEqual(route.confidence, 'medium');
+});
+
+test('findRouteForTaskType - provisional does not meet medium threshold', () => {
+  const provisionalOnly = {
+    ...dogfoodMediumVsProvisional,
+    entries: [dogfoodMediumVsProvisional.entries[1]]
+  };
+  const route = findRouteForTaskType(provisionalOnly, 'tiny_code_snippet', 'medium');
+  assert.strictEqual(route, null, 'provisional alone must not qualify at require_confidence: medium');
+
+  const atLow = findRouteForTaskType(provisionalOnly, 'tiny_code_snippet', 'low');
+  assert.ok(atLow, 'provisional should qualify at require_confidence: low');
+  assert.strictEqual(atLow.harness, 'little-coder');
+  assert.strictEqual(atLow.confidence, 'provisional');
+});
+
+test('getTaskTypesByConfidence - medium threshold excludes provisional', () => {
+  const atMedium = getTaskTypesByConfidence(dogfoodMediumVsProvisional, 'medium');
+  assert.strictEqual(atMedium.length, 1);
+  assert.strictEqual(atMedium[0].harness, 'opencode');
+  assert.strictEqual(atMedium[0].confidence, 'medium');
+
+  const atLow = getTaskTypesByConfidence(dogfoodMediumVsProvisional, 'low');
+  assert.strictEqual(atLow.length, 2);
 });

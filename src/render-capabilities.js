@@ -25,7 +25,7 @@ async function renderCapabilities() {
   md += '(dogfood evidence; see `evidence/`). Rows without evidence render as pending. ';
   md += 'Further **high** promotions still require the quality bar ';
   md += '(PASS ≥ 0.9, ≥2 runs, human review, objective check). ';
-  md += '`provisional` = promote-with-notes (not auto-routed at `require_confidence: high`).\n\n';
+  md += '`provisional` = promote-with-notes; ranks below medium (not auto-routed at `require_confidence: high` or `medium`).\n\n';
   
   md += '## Quality Policy\n\n';
   md += `- **Quality Bar**: ${capabilities.policy.quality_bar}\n`;

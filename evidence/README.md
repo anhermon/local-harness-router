@@ -17,7 +17,7 @@ To promote a task type to `high` confidence in `capabilities.yaml`:
 3. **Human/agent review note** filed in this directory
 4. **Add run IDs** to the `evidence: [...]` array
 
-Use `provisional` confidence for promising task types that haven't been evaluated yet. Use `medium` for preliminary positive signals or PASS ≥ 0.7. Use `low` for exploratory work.
+Use `medium` for preliminary positive signals or PASS ≥ 0.7 (evidence-backed). Use `provisional` for promising task types that haven't been fully evaluated yet — it ranks **below** `medium` and does not meet `require_confidence: medium`. Use `low` for exploratory work. Routing preference: high > medium > provisional > low.
 
 ## Workflow (Dogfooding Team)
 

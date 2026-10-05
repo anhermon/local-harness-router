@@ -12,10 +12,12 @@ policy:
   # Arena skeleton PASS (SOLUTION.md exists) is insufficient alone; require usable artifact.
   require_manual_or_objective_check: true
   confidence_for_auto_route: high
+  # Rank for routing: high > medium > provisional > low.
+  # provisional is below medium (awaiting evaluation) — does not meet require_confidence: medium.
   confidence_levels:
     high: "PASS >= 0.9 on rubric AND human/agent review note AND ≥2 arena runs"
-    provisional: "promising for task type; awaiting arena evaluation for high promotion"
-    medium: "PASS >= 0.7 or preliminary positive signal"
+    medium: "PASS >= 0.7 or preliminary positive signal (evidence-backed; outranks provisional)"
+    provisional: "promising / promote-with-notes; awaiting arena evaluation — ranks below medium; only auto-routes at require_confidence: low"
     low: "exploratory; not yet reliable"
 entries:
   - harness: opencode

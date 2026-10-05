@@ -7,6 +7,22 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = join(__dirname, '..');
 
 /**
+ * Confidence rank for routing eligibility and preference.
+ * Order: high > medium > provisional > low.
+ *
+ * Measured / evidence-backed levels (high, medium) outrank provisional
+ * ("promising; awaiting arena evaluation"). Provisional therefore does
+ * *not* meet require_confidence: medium — only high and medium do.
+ * Provisional qualifies when require_confidence is low.
+ */
+export const CONFIDENCE_RANK = {
+  high: 3,
+  medium: 2,
+  provisional: 1,
+  low: 0
+};
+
+/**
  * Load capabilities map from YAML
  */
 export async function loadCapabilities() {
@@ -28,14 +44,13 @@ export async function loadConfig() {
  * Get all task types with given confidence level or higher
  */
 export function getTaskTypesByConfidence(capabilities, minConfidence = 'high') {
-  const confidenceLevels = { high: 3, provisional: 2, medium: 1, low: 0 };
-  const minLevel = confidenceLevels[minConfidence] ?? 3;
+  const minLevel = CONFIDENCE_RANK[minConfidence] ?? CONFIDENCE_RANK.high;
   
   const taskTypes = [];
   
   for (const entry of capabilities.entries) {
     for (const taskType of entry.task_types) {
-      const level = confidenceLevels[taskType.confidence] ?? 0;
+      const level = CONFIDENCE_RANK[taskType.confidence] ?? 0;
       if (level >= minLevel) {
         taskTypes.push({
           id: taskType.id,
@@ -56,8 +71,7 @@ export function getTaskTypesByConfidence(capabilities, minConfidence = 'high') {
  * Find best route for a given task type
  */
 export function findRouteForTaskType(capabilities, taskType, minConfidence = 'high') {
-  const confidenceLevels = { high: 3, provisional: 2, medium: 1, low: 0 };
-  const minLevel = confidenceLevels[minConfidence] ?? 3;
+  const minLevel = CONFIDENCE_RANK[minConfidence] ?? CONFIDENCE_RANK.high;
   
   let bestRoute = null;
   let bestLevel = -1;
@@ -65,7 +79,7 @@ export function findRouteForTaskType(capabilities, taskType, minConfidence = 'hi
   for (const entry of capabilities.entries) {
     for (const tt of entry.task_types) {
       if (tt.id === taskType) {
-        const level = confidenceLevels[tt.confidence] ?? 0;
+        const level = CONFIDENCE_RANK[tt.confidence] ?? 0;
         if (level >= minLevel && level > bestLevel) {
           bestRoute = {
             harness: entry.harness,

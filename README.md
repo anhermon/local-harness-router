@@ -12,6 +12,7 @@ Several excellent open-source tools route LLM requests, but they solve a **diffe
 
 - **[LiteLLM](https://github.com/BerriAI/litellm)** (including Auto Router), **[RouteLLM](https://github.com/lm-sys/RouteLLM)**, and similar routers optimize **model selection** for cost, latency, or load-balancing across providers/GPUs.
 - **[Continue](https://github.com/continuedev/continue)**, **[Aider](https://github.com/paul-gauthier/aider)**, and related IDE tools let users pick a model, but the routing is **manual or model-centric**.
+- **[Agent-as-a-Router / ACRouter](https://github.com/LanceZPF/agent-as-a-router)** ([arXiv:2606.22902](https://arxiv.org/abs/2606.22902)) routes among **8 paid frontier API models** inside one fixed harness (`mini-swe-agent`), with a verifier + memory loop — not local harness×model pairs and not reject-by-default, so it does not overlap with LHR. Its paper also finds that a static best-model-per-task-type lookup (DimensionBest) reached about **83% of oracle** AvgPerf, which supports LHR's static capability-table approach.
 
 `local-harness-router` addresses a complementary problem: **which harness×model combination** can reliably handle a given task type? The same model behaves differently under different harnesses (see [dogfood evidence](evidence/2026-09-29-dogfood.md), [lean-prompt rebench](evidence/2026-10-01-lean-rebench.md), and [2026-10-05 weekly rebench](evidence/2026-10-05-weekly-rebench.md): on tip `834d891`, `opencode`+`qwen2.5:3b-instruct` is only **medium** for `tiny_code_snippet` and **not_suitable** for `extract_structured` / `rewrite_short_prose` — nothing local auto-routes at `require_confidence: high`; `little-coder` remains a **provisional** lean-prompt candidate with hang caveats). This project:
 
@@ -103,10 +104,10 @@ All capability claims require:
 
 **Important:** Arena skeleton PASS (e.g., `SOLUTION.md` exists) is insufficient alone. Several FAIL-quality cells can still achieve PASS 1.00 on skeleton checks. The Dogfooding team always performs manual or objective post-checks before promoting to `high` confidence.
 
-Confidence levels:
+Confidence levels (routing rank: **high > medium > provisional > low**):
 - **high**: PASS ≥ 0.9, ≥2 runs, verified usable artifacts
-- **provisional**: promising but awaiting full arena evaluation
-- **medium**: PASS ≥ 0.7 or preliminary positive signal
+- **medium**: PASS ≥ 0.7 or preliminary positive signal (evidence-backed; outranks provisional)
+- **provisional**: promising / promote-with-notes; awaiting full arena evaluation — does **not** meet `require_confidence: medium` (only auto-routes at `low`)
 - **low**: exploratory; not yet reliable
 
 Evidence links are maintained by the Dogfooding team through harness-arena evaluation runs. See `evidence/README.md` for details. Demotions (e.g. 2026-10-05 tip rebench) are recorded the same way — reduce confidence or move task types to `not_suitable` when tip objective checks fail.
