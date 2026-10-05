@@ -13,7 +13,7 @@ Several excellent open-source tools route LLM requests, but they solve a **diffe
 - **[LiteLLM](https://github.com/BerriAI/litellm)** (including Auto Router), **[RouteLLM](https://github.com/lm-sys/RouteLLM)**, and similar routers optimize **model selection** for cost, latency, or load-balancing across providers/GPUs.
 - **[Continue](https://github.com/continuedev/continue)**, **[Aider](https://github.com/paul-gauthier/aider)**, and related IDE tools let users pick a model, but the routing is **manual or model-centric**.
 
-`local-harness-router` addresses a complementary problem: **which harness×model combination** can reliably handle a given task type? The same model behaves differently under different harnesses (see [dogfood evidence](evidence/2026-09-29-dogfood.md) and [lean-prompt rebench](evidence/2026-10-01-lean-rebench.md): `qwen2.5:3b-instruct` is proven under default `opencode`; `little-coder` is only a **provisional** lean-prompt candidate with hang caveats). This project:
+`local-harness-router` addresses a complementary problem: **which harness×model combination** can reliably handle a given task type? The same model behaves differently under different harnesses (see [dogfood evidence](evidence/2026-09-29-dogfood.md), [lean-prompt rebench](evidence/2026-10-01-lean-rebench.md), and [2026-10-05 weekly rebench](evidence/2026-10-05-weekly-rebench.md): on tip `834d891`, `opencode`+`qwen2.5:3b-instruct` is only **medium** for `tiny_code_snippet` and **not_suitable** for `extract_structured` / `rewrite_short_prose` — nothing local auto-routes at `require_confidence: high`; `little-coder` remains a **provisional** lean-prompt candidate with hang caveats). This project:
 
 - Maps **harness×model pairs** to task types, not just models to latency/cost.
 - Routes based on **evidence** from harness-arena evaluation runs (PASS ≥ 0.9 + manual quality checks).
@@ -109,7 +109,7 @@ Confidence levels:
 - **medium**: PASS ≥ 0.7 or preliminary positive signal
 - **low**: exploratory; not yet reliable
 
-Evidence links are maintained by the Dogfooding team through harness-arena evaluation runs. See `evidence/README.md` for details.
+Evidence links are maintained by the Dogfooding team through harness-arena evaluation runs. See `evidence/README.md` for details. Demotions (e.g. 2026-10-05 tip rebench) are recorded the same way — reduce confidence or move task types to `not_suitable` when tip objective checks fail.
 
 ## Scripts
 
@@ -191,4 +191,4 @@ npm test
 
 ---
 
-**Status**: v0 — Router and capability map structure complete. Evidence promotion in progress by Dogfooding team.
+**Status**: v0 — Router and capability map structure complete. As of 2026-10-05 tip rebench, no local cell meets `confidence_for_auto_route: high` (see `evidence/2026-10-05-weekly-rebench.md`); default fallback is reject.
