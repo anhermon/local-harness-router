@@ -2,7 +2,7 @@
 
 **Last Updated**: 2026-10-05T09:15:00+03:00
 
-**NOTE**: Promoted / provisional task-type rows cite harness-arena run IDs (dogfood evidence; see `evidence/`). Rows without evidence render as pending. Further **high** promotions still require the quality bar (PASS ≥ 0.9, ≥2 runs, human review, objective check). `provisional` = promote-with-notes (not auto-routed at `require_confidence: high`).
+**NOTE**: Promoted / provisional task-type rows cite harness-arena run IDs (dogfood evidence; see `evidence/`). Rows without evidence render as pending. Further **high** promotions still require the quality bar (PASS ≥ 0.9, ≥2 runs, human review, objective check). `provisional` = promote-with-notes; ranks below medium (not auto-routed at `require_confidence: high` or `medium`).
 
 ## Quality Policy
 
@@ -10,8 +10,8 @@
 - **Minimum Runs**: 2
 - **Confidence Levels**:
   - **high**: PASS >= 0.9 on rubric AND human/agent review note AND ≥2 arena runs
-  - **provisional**: promising for task type; awaiting arena evaluation for high promotion
-  - **medium**: PASS >= 0.7 or preliminary positive signal
+  - **medium**: PASS >= 0.7 or preliminary positive signal (evidence-backed; outranks provisional)
+  - **provisional**: promising / promote-with-notes; awaiting arena evaluation — ranks below medium; only auto-routes at require_confidence: low
   - **low**: exploratory; not yet reliable
 
 ## Supported Harness:Model Combinations

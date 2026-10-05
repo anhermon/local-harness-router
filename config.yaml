@@ -6,6 +6,8 @@ fallback: reject
 
 # Minimum confidence level required for auto-routing
 # Options: high | medium | low
+# Rank: high > medium > provisional > low. "provisional" entries only match when
+# require_confidence is low (they do not meet the medium threshold).
 require_confidence: high
 
 # Frontier provider fallback (opt-in only; requires API keys)
