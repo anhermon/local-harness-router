@@ -1,6 +1,6 @@
 # Capability Map
 
-**Last Updated**: 2026-10-01T15:19:00+03:00
+**Last Updated**: 2026-10-05T09:15:00+03:00
 
 **NOTE**: Promoted / provisional task-type rows cite harness-arena run IDs (dogfood evidence; see `evidence/`). Rows without evidence render as pending. Further **high** promotions still require the quality bar (PASS ≥ 0.9, ≥2 runs, human review, objective check). `provisional` = promote-with-notes (not auto-routed at `require_confidence: high`).
 
@@ -18,18 +18,18 @@
 
 ### opencode:ollama/qwen2.5:3b-instruct
 
-Proven daily path without lean-prompt. KEEP_OFF for opencode+lean (20261001-151618): degraded, garbage text, no tools/files — worse than default. Leave default routing alone; never force --lean-prompt here.
+2026-10-05 weekly rebench on harness-arena@834d891: demoted tiny_code high→medium; extract_structured and rewrite_short_prose high→not_suitable (tip objective 0/3 and 0/2). Net: nothing local meets confidence_for_auto_route: high on tip — router falls to reject-default. Prior lean KEEP_OFF for opencode+lean (20261001-151618) unchanged; never force --lean-prompt here.
 
 #### Task Types
 
 | Task Type | Confidence | Evidence | Notes |
 |-----------|------------|----------|-------|
-| `tiny_code_snippet` | high | [20260928-231055](../runs/20260928-231055), [20260929-081437](../runs/20260929-081437), [20261001-151648](../runs/20261001-151648) | Single small file (e.g. hello.py) + SOLUTION.md. Code usable; SOLUTION.md often formulaic. Prefer -t code. Default (non-lean) path reconfirmed PASS on harness-arena@834d891 (20261001-151648). Do NOT force --lean-prompt on this cell — lean regresses it. |
-| `extract_structured` | high | [20260929-081619](../runs/20260929-081619), [20260929-083323](../runs/20260929-083323) | Short text → named result.json with strict schema; no markdown fences. Use code task type, not creative/output.md. Occasional hang after JSON write (see 20260929-082813) — keep prompts tiny. |
-| `rewrite_short_prose` | high | [20260929-082405](../runs/20260929-082405), [20260929-083411](../runs/20260929-083411) | ≤~40 word rewrite into rewrite.md + SOLUTION.md. Name the content file explicitly; do not rely on SOLUTION.md alone. |
+| `tiny_code_snippet` | medium | [20260928-231055](../runs/20260928-231055), [20260929-081437](../runs/20260929-081437), [20261001-151648](../runs/20261001-151648), [20261005-090323](../runs/20261005-090323), [20261005-085227](../runs/20261005-085227) | 2026-10-05 demoted high→medium on harness-arena@834d891. Hello-style one-liners still usable (20261005-090323); a 5-line fizz(n) came back markdown-fenced and does not compile (20261005-085227). Prefer -t code; do NOT force --lean-prompt (lean KEEP_OFF 20261001-151618). Not high: do not auto-route at confidence_for_auto_route: high — trivial one-liners with objective compile check only. |
 
 #### Not Suitable For
 
+- `extract_structured`
+- `rewrite_short_prose`
 - `classify_label`
 - `explain_simple`
 - `unit_test_stub`
@@ -94,8 +94,6 @@ Too small for arena contract + tool loop; do not route.
 
 Current task types supported across all harnesses:
 
-- `extract_structured`
-- `rewrite_short_prose`
 - `tiny_code_snippet`
 
 **Not suitable for local LLMs yet**: multi-file refactor, security review, architecture design, long context research, complex debugging, tool-heavy agent loops

@@ -1,9 +1,9 @@
 {
   "version": 1,
-  "updated_at": "2026-10-01T15:19:00+03:00",
+  "updated_at": "2026-10-05T09:15:00+03:00",
   "source": "dogfood-evidence",
   "arena": {
-    "url": "http://127.0.0.1:5188",
+    "url": "http://127.0.0.1:5190",
     "runs_dir": "/workspace/harness-arena-daily-driver/runs",
     "checkout": "harness-arena@834d891"
   },
@@ -26,34 +26,20 @@
       "task_types": [
         {
           "id": "tiny_code_snippet",
-          "confidence": "high",
+          "confidence": "medium",
           "evidence": [
             "20260928-231055",
             "20260929-081437",
-            "20261001-151648"
+            "20261001-151648",
+            "20261005-090323",
+            "20261005-085227"
           ],
-          "notes": "Single small file (e.g. hello.py) + SOLUTION.md. Code usable; SOLUTION.md often formulaic. Prefer -t code. Default (non-lean) path reconfirmed PASS on harness-arena@834d891 (20261001-151648). Do NOT force --lean-prompt on this cell — lean regresses it."
-        },
-        {
-          "id": "extract_structured",
-          "confidence": "high",
-          "evidence": [
-            "20260929-081619",
-            "20260929-083323"
-          ],
-          "notes": "Short text → named result.json with strict schema; no markdown fences. Use code task type, not creative/output.md. Occasional hang after JSON write (see 20260929-082813) — keep prompts tiny."
-        },
-        {
-          "id": "rewrite_short_prose",
-          "confidence": "high",
-          "evidence": [
-            "20260929-082405",
-            "20260929-083411"
-          ],
-          "notes": "≤~40 word rewrite into rewrite.md + SOLUTION.md. Name the content file explicitly; do not rely on SOLUTION.md alone."
+          "notes": "2026-10-05 demoted high→medium on harness-arena@834d891. Hello-style one-liners still usable (20261005-090323); a 5-line fizz(n) came back markdown-fenced and does not compile (20261005-085227). Prefer -t code; do NOT force --lean-prompt (lean KEEP_OFF 20261001-151618). Not high: do not auto-route at confidence_for_auto_route: high — trivial one-liners with objective compile check only."
         }
       ],
       "not_suitable": [
+        "extract_structured",
+        "rewrite_short_prose",
         "classify_label",
         "explain_simple",
         "unit_test_stub",
@@ -64,7 +50,7 @@
         "tool_heavy_agent_loops",
         "creative_json_only_output_md"
       ],
-      "notes": "Proven daily path without lean-prompt. KEEP_OFF for opencode+lean (20261001-151618): degraded, garbage text, no tools/files — worse than default. Leave default routing alone; never force --lean-prompt here."
+      "notes": "2026-10-05 weekly rebench on harness-arena@834d891: demoted tiny_code high→medium; extract_structured and rewrite_short_prose high→not_suitable (tip objective 0/3 and 0/2). Net: nothing local meets confidence_for_auto_route: high on tip — router falls to reject-default. Prior lean KEEP_OFF for opencode+lean (20261001-151618) unchanged; never force --lean-prompt here."
     },
     {
       "harness": "little-coder",
