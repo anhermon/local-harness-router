@@ -1,12 +1,12 @@
 version: 1
-updated_at: "2026-10-08T22:45:00+03:00"
+updated_at: "2026-10-08T23:15:00+03:00"
 source: dogfood-evidence
 arena:
   url: http://127.0.0.1:5190
   runs_dir: /workspace/harness-arena-daily-driver/runs
-  checkout: harness-arena@e529fbe
-  # 2026-10-08 new-model bench: 16k ctx, -e off, --lean-prompt, 3 rounds.
-  # Confinement tip for LC absolute-path remaps is pending harness-arena #17.
+  checkout: harness-arena@d44b94d
+  # 2026-10-08 new-model bench: 16k ctx, -e off, --lean-prompt, 3 rounds (benched on e529fbe).
+  # little-coder+qwen3.5:4b re-evaluated on d44b94d (landing-path confinement, #17 = fccad9d).
 policy:
   quality_bar: high
   min_runs: 2
@@ -141,41 +141,44 @@ entries:
     lean_prompt: true
     task_types:
       - id: tiny_code_snippet
-        confidence: medium
+        confidence: high
         evidence:
           - "20261008-203743"
           - "20261008-210624"
           - "20261008-212857"
+          - "20261008-225605"   # live re-run on #17+#18: PASS 1.00, host /fizz.py absent
         notes: >-
-          2026-10-08 obj 3/3; arena 0/3 on cell-confinement because the model
-          requests /fizz.py-style absolute paths that little-coder remaps into
-          the cell (host /fizz.py does not exist). Capped at medium until
-          harness-arena landing-path confinement (PR #17) lands; then re-rate
-          toward high. Require effort=off and --lean-prompt.
+          Obj 3/3; arena 3/3 under harness-arena@d44b94d. The model asks for
+          /fizz.py and little-coder writes <cell>/fizz.py. The arena now checks the
+          landing path (#17), so these runs pass. Live re-run 20261008-225605 also
+          PASSed 1.00. Require effort=off and --lean-prompt.
       - id: extract_structured
-        confidence: medium
+        confidence: high
         evidence:
           - "20261008-203856"
           - "20261008-210740"
           - "20261008-213025"
         notes: >-
-          2026-10-08 obj 3/3; arena 0/3 same confinement false-positive. Medium
-          until harness-arena #17. Require effort=off and --lean-prompt.
+          Obj 3/3; arena 3/3 under d44b94d (remapped /result.json, /SOLUTION.md).
+          Require effort=off and --lean-prompt.
       - id: rewrite_short_prose
-        confidence: medium
+        confidence: high
         evidence:
           - "20261008-203932"
           - "20261008-210816"
           - "20261008-213101"
         notes: >-
-          2026-10-08 obj 3/3, arena 2/3 (one confinement miss). Medium until
-          harness-arena #17. Require effort=off and --lean-prompt.
+          Obj 3/3; arena 3/3 under d44b94d (210816 remapped /rewrite.md). Require
+          effort=off and --lean-prompt.
     not_suitable: []
     notes: >-
-      2026-10-08: content is high-quality (objective 9/9) but arena confinement
-      falsely fails remapped absolute paths. Rated medium and capped there until
-      harness-arena landing-path confinement (#17) lands; then re-rate toward high.
-      Always use effort=off and --lean-prompt.
+      Raised medium→high on 2026-10-08 after harness-arena #17 (fccad9d) changed
+      cell confinement to judge where a write landed. Replaying the 9 bench cells
+      under merged master d44b94d: obj 9/9, arena 9/9, 0 escapes, host paths
+      absent. That matches granite4.2:3b (9/9) and beats pi+qwen3.5:4b (8/9).
+      The rating needs an arena with landing-path confinement (>= fccad9d);
+      older arenas falsely fail these cells. Listed after pi+granite, so it only
+      wins when that pair is unavailable. Always use effort=off and --lean-prompt.
 
   # ---- prior entries (unchanged ratings; baseline + KEEP_OFF) ----
   - harness: opencode

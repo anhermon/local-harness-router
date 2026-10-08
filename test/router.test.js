@@ -217,7 +217,9 @@ test('formatArenaInvocation - builds cell@effort and lean flag', () => {
     lean_prompt: true
   });
   assert.strictEqual(inv.cell, 'pi:ollama/qwen3.5:4b@off');
-  assert.deepStrictEqual(inv.flags, ['--lean-prompt', '-e off']);
+  // effort is carried by the cell's @off suffix; repeating -e off in flags is redundant (Dogfooding #8 nit).
+  assert.deepStrictEqual(inv.flags, ['--lean-prompt']);
+  assert.ok(!inv.flags.some((f) => f.startsWith('-e')), 'no -e flag when effort is in the cell');
   assert.ok(inv.argv.includes('--lean-prompt'));
   assert.ok(inv.argv.includes('pi:ollama/qwen3.5:4b@off'));
 });
@@ -233,23 +235,25 @@ test('2026-10-08 map - high routes prefer pi granite with effort=off + lean', as
   assert.strictEqual(r.confidence, 'high');
 });
 
-test('2026-10-08 map - qwen3.5 on little-coder is medium (capped pending #17)', async () => {
+test('2026-10-08 map - qwen3.5 on little-coder is high after landing-path confinement (harness-arena #17)', async () => {
   const caps = await loadCapabilities();
-  // Only the LC qwen entry: it must not route at high, and must route at medium.
-  const lcOnly = { ...caps, entries: caps.entries.filter((e) => e.harness === 'little-coder' && e.model === 'ollama/qwen3.5:4b') };
-  for (const tt of ['tiny_code_snippet', 'extract_structured', 'rewrite_short_prose']) {
-    assert.strictEqual(findLive(lcOnly, tt, 'high'), null, `${tt}: LC qwen3.5 must not auto-route at high`);
-    const m = findLive(lcOnly, tt, 'medium');
-    assert.ok(m && m.confidence === 'medium' && m.effort === 'off', `${tt}: LC qwen3.5 routes at medium with effort=off`);
-  }
-
-  // At medium threshold the LC qwen entry exists and carries the cap note.
   const lc = caps.entries.find((e) => e.harness === 'little-coder' && e.model === 'ollama/qwen3.5:4b');
   assert.ok(lc);
-  assert.ok(lc.task_types.every((t) => t.confidence === 'medium'));
-  assert.ok(/harness-arena.*#17|landing-path/i.test(lc.notes));
+  assert.ok(lc.task_types.every((t) => t.confidence === 'high'), 'LC qwen3.5 high on all three tasks');
+  assert.ok(lc.task_types.every((t) => t.evidence.length >= 3), '>=3 arena runs each');
+  assert.ok(!/capped|until .*#17/i.test(lc.notes), 'no stale "capped until #17" note');
+  assert.ok(/fccad9d|#17/.test(lc.notes), 'notes record the arena version the rating depends on');
   assert.strictEqual(lc.effort, 'off');
   assert.strictEqual(lc.lean_prompt, true);
+  // Routes at high with effort=off when it's the only candidate…
+  const lcOnly = { ...caps, entries: [lc] };
+  for (const tt of ['tiny_code_snippet', 'extract_structured', 'rewrite_short_prose']) {
+    const r = findLive(lcOnly, tt, 'high');
+    assert.ok(r && r.effort === 'off' && formatArenaInvocation(r).cell === 'little-coder:ollama/qwen3.5:4b@off', `${tt}: LC qwen3.5 routes at high @off`);
+  }
+  // …but pi+granite (listed first, faster) still wins the tie on the full map.
+  assert.strictEqual(findLive(caps, 'extract_structured', 'high').harness, 'pi');
+  assert.strictEqual(findLive(caps, 'extract_structured', 'high').baseModel, 'ollama/granite4.2:3b');
 });
 
 test('2026-10-08 map - baseline LC and minicpm stay weak', async () => {
@@ -276,7 +280,7 @@ test('route() dry-run surfaces cell@off and lean_prompt for promoted models', as
   assert.strictEqual(result.route.lean_prompt, true);
   assert.ok(result.route.cell.endsWith('@off'));
   assert.ok(result.route.flags.includes('--lean-prompt'));
-  assert.ok(result.route.flags.includes('-e off'));
+  assert.ok(!result.route.flags.some((f) => f.startsWith('-e')), 'effort lives in cell@off, not a repeated -e flag');
 });
 
 test('2026-10-08 map - pi qwen3.5 route carries thinking-off requirement', async () => {
