@@ -1,4 +1,4 @@
-import { loadCapabilities, loadConfig, findRouteForTaskType } from './capabilities.js';
+import { loadCapabilities, loadConfig, findRouteForTaskType, formatArenaInvocation } from './capabilities.js';
 import { classifyPrompt, explainClassification } from './classifier.js';
 
 /**
@@ -62,11 +62,18 @@ export async function route(prompt, options = {}) {
     };
   }
   
-  // Build routing result
+  // Build routing result (effort / lean_prompt come from the capability entry so
+  // callers — and executeRoute — actually apply the flags the bench required).
+  const invocation = formatArenaInvocation(route);
   const result = {
     route: {
       harness: route.harness,
-      model: route.model,
+      model: route.baseModel || route.model,
+      modelRaw: route.model,
+      effort: route.effort || null,
+      lean_prompt: !!route.lean_prompt,
+      cell: invocation.cell,
+      flags: invocation.flags,
       taskType: route.taskType,
       confidence: route.confidence,
       reason: classifiedTaskType 
@@ -95,26 +102,30 @@ export async function route(prompt, options = {}) {
  * @returns {Promise<Object>} - Execution result
  */
 async function executeRoute(prompt, route, config) {
-  const { harness, model } = route;
-  
-  // Check if harness is available
-  const availableHarnesses = ['opencode', 'little-coder'];
-  
+  const { harness } = route;
+  const inv = formatArenaInvocation(route);
+  const availableHarnesses = ['opencode', 'little-coder', 'pi'];
+
   if (!availableHarnesses.includes(harness)) {
     return {
       success: false,
       message: `Harness '${harness}' is not yet wired for execution in v0.\nSupported harnesses: ${availableHarnesses.join(', ')}`
     };
   }
-  
-  // In v0, we don't actually execute - just provide instructions
+
+  const flagNote = inv.flags.length
+    ? `\nRequired flags for this route (from the capability entry): ${inv.flags.join(' ')}`
+    : '';
+
+  // In v0, we don't actually execute - just provide instructions that apply effort/lean.
   return {
     success: false,
-    message: `Execution via ${harness}:${model} is not yet implemented in v0.
+    message: `Execution via ${inv.cell} is not yet implemented in v0.
+${flagNote}
 
-To execute manually:
+To execute manually (matches the 2026-10-08 bench that promoted this route):
   1. Ensure harness-arena is installed
-  2. Run: ./arena run --harness ${harness} --model ${model} --prompt "${prompt}"
+  2. Run: ./arena run "${prompt}" -c ${inv.cell}${route.lean_prompt ? ' --lean-prompt' : ''}
   3. Check results in ${config.arena?.runs_dir || './runs'}
 
 Future versions will support direct execution.`

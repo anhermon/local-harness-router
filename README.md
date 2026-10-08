@@ -14,7 +14,7 @@ Several excellent open-source tools route LLM requests, but they solve a **diffe
 - **[Continue](https://github.com/continuedev/continue)**, **[Aider](https://github.com/paul-gauthier/aider)**, and related IDE tools let users pick a model, but the routing is **manual or model-centric**.
 - **[Agent-as-a-Router / ACRouter](https://github.com/LanceZPF/agent-as-a-router)** ([arXiv:2606.22902](https://arxiv.org/abs/2606.22902)) routes among **8 paid frontier API models** inside one fixed harness (`mini-swe-agent`), with a verifier + memory loop — not local harness×model pairs and not reject-by-default, so it does not overlap with LHR. Its paper also finds that a static best-model-per-task-type lookup (DimensionBest) reached about **83% of oracle** AvgPerf, which supports LHR's static capability-table approach.
 
-`local-harness-router` addresses a complementary problem: **which harness×model combination** can reliably handle a given task type? The same model behaves differently under different harnesses (see [dogfood evidence](evidence/2026-09-29-dogfood.md), [lean-prompt rebench](evidence/2026-10-01-lean-rebench.md), and [2026-10-05 weekly rebench](evidence/2026-10-05-weekly-rebench.md): on tip `834d891`, `opencode`+`qwen2.5:3b-instruct` is only **medium** for `tiny_code_snippet` and **not_suitable** for `extract_structured` / `rewrite_short_prose` — nothing local auto-routes at `require_confidence: high`; `little-coder` remains a **provisional** lean-prompt candidate with hang caveats). This project:
+`local-harness-router` addresses a complementary problem: **which harness×model combination** can reliably handle a given task type? The same model behaves differently under different harnesses (see [dogfood evidence](evidence/2026-09-29-dogfood.md), [lean-prompt rebench](evidence/2026-10-01-lean-rebench.md), [2026-10-05 weekly rebench](evidence/2026-10-05-weekly-rebench.md), and [2026-10-08 new-model bench](evidence/2026-10-08-newmodels.md): tip-class arena now has **high**-confidence local routes — `pi`/`little-coder`+`granite4.2:3b` and `pi`+`qwen3.5:4b` on tiny_code / extract / rewrite, always with `-e off` + `--lean-prompt`; `little-coder`+`qwen3.5:4b` is **medium** until harness-arena landing-path confinement lands; baseline LC `qwen2.5:3b-instruct` stays weak). This project:
 
 - Maps **harness×model pairs** to task types, not just models to latency/cost.
 - Routes based on **evidence** from harness-arena evaluation runs (PASS ≥ 0.9 + manual quality checks).
@@ -179,8 +179,8 @@ npm test
 ## Constraints (v0)
 
 - **No Codex/Agy/Claude** sandbox logins (ToS caution)
-- **Local Ollama only**: `qwen2.5:3b-instruct`, `qwen2.5:0.5b`
-- **Local harnesses**: `opencode`, `little-coder` (wired to Ollama)
+- **Local Ollama**: `granite4.2:3b`, `qwen3.5:4b` (promoted 2026-10-08), `qwen2.5:3b-instruct`, `qwen2.5:0.5b`; minicpm5 not_suitable
+- **Local harnesses**: `opencode`, `little-coder`, `pi` (wired to Ollama)
 - **Frontier fallback**: config-gated, off by default, not wired in v0
 
 ## See Also
