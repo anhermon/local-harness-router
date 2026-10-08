@@ -73,8 +73,11 @@ async function main() {
     }
     
     if (result.route) {
-      console.log(`\nSelected: ${result.route.harness}:${result.route.model}`);
+      console.log(`\nSelected: ${result.route.cell || (result.route.harness + ':' + result.route.model)}`);
       console.log(`Confidence: ${result.route.confidence}`);
+      if (result.route.effort) console.log(`Effort: ${result.route.effort} (required)`);
+      if (result.route.lean_prompt) console.log(`Lean prompt: required (--lean-prompt)`);
+      if (result.route.flags?.length) console.log(`Flags: ${result.route.flags.join(' ')}`);
       console.log(`Reason: ${result.route.reason}`);
       
       if (values['dry-run']) {

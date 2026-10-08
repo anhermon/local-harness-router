@@ -22,6 +22,46 @@ export const CONFIDENCE_RANK = {
   low: 0
 };
 
+
+/**
+ * Split a model id that may carry an inline @effort suffix
+ * (harness-arena cell-spec syntax, e.g. "ollama/qwen3.5:4b@off").
+ * Entry-level `effort` wins over a suffix on `model`.
+ */
+export function splitModelEffort(model, entryEffort = null) {
+  const raw = String(model || "");
+  const at = raw.lastIndexOf("@");
+  // Only treat @effort when it looks like a short effort token (no / or : after @).
+  if (at > 0 && !/[\/:@]/.test(raw.slice(at + 1))) {
+    return {
+      model: raw.slice(0, at),
+      effort: entryEffort != null && entryEffort !== "" ? entryEffort : raw.slice(at + 1) || null,
+    };
+  }
+  return { model: raw, effort: entryEffort != null && entryEffort !== "" ? entryEffort : null };
+}
+
+/** Build the arena cell-spec + flags a caller should pass for this route. */
+export function formatArenaInvocation(route) {
+  if (!route) return null;
+  const { model: baseModel, effort } = splitModelEffort(route.model, route.effort);
+  const cell = effort
+    ? `${route.harness}:${baseModel}@${effort}`
+    : `${route.harness}:${baseModel}`;
+  const flags = [];
+  if (route.lean_prompt) flags.push("--lean-prompt");
+  if (effort) flags.push(`-e ${effort}`);
+  return {
+    cell,
+    model: baseModel,
+    effort,
+    lean_prompt: !!route.lean_prompt,
+    flags,
+    // Preferred one-liner for ./arena run
+    argv: ["run", "<prompt>", "-c", cell, ...(route.lean_prompt ? ["--lean-prompt"] : [])],
+  };
+}
+
 /**
  * Load capabilities map from YAML
  */
@@ -52,10 +92,14 @@ export function getTaskTypesByConfidence(capabilities, minConfidence = 'high') {
     for (const taskType of entry.task_types) {
       const level = CONFIDENCE_RANK[taskType.confidence] ?? 0;
       if (level >= minLevel) {
+        const { model, effort } = splitModelEffort(entry.model, entry.effort ?? null);
         taskTypes.push({
           id: taskType.id,
           harness: entry.harness,
-          model: entry.model,
+          model: entry.model, // keep raw (may include @effort) for display
+          baseModel: model,
+          effort,
+          lean_prompt: !!entry.lean_prompt,
           confidence: taskType.confidence,
           evidence: taskType.evidence,
           notes: taskType.notes
@@ -81,13 +125,17 @@ export function findRouteForTaskType(capabilities, taskType, minConfidence = 'hi
       if (tt.id === taskType) {
         const level = CONFIDENCE_RANK[tt.confidence] ?? 0;
         if (level >= minLevel && level > bestLevel) {
+          const { model, effort } = splitModelEffort(entry.model, entry.effort ?? null);
           bestRoute = {
             harness: entry.harness,
             model: entry.model,
+            baseModel: model,
+            effort,
+            lean_prompt: !!entry.lean_prompt,
             taskType: tt.id,
             confidence: tt.confidence,
             evidence: tt.evidence,
-            notes: tt.notes
+            notes: tt.notes || entry.notes || null
           };
           bestLevel = level;
         }

@@ -39,7 +39,13 @@ async function renderCapabilities() {
   md += '## Supported Harness:Model Combinations\n\n';
   
   for (const entry of capabilities.entries) {
+    const runFlags = [];
+    if (entry.effort) runFlags.push(`effort: ${entry.effort}`);
+    if (entry.lean_prompt) runFlags.push('--lean-prompt');
     md += `### ${entry.harness}:${entry.model}\n\n`;
+    if (runFlags.length) {
+      md += `**Required run flags**: ${runFlags.map((f) => '`' + f + '`').join(', ')}\n\n`;
+    }
 
     if (entry.notes) {
       md += `${oneLine(entry.notes)}\n\n`;

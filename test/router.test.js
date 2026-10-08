@@ -197,3 +197,95 @@ test('getTaskTypesByConfidence - medium threshold excludes provisional', () => {
   const atLow = getTaskTypesByConfidence(dogfoodMediumVsProvisional, 'low');
   assert.strictEqual(atLow.length, 2);
 });
+
+import { splitModelEffort, formatArenaInvocation, loadCapabilities, findRouteForTaskType as findLive } from '../src/capabilities.js';
+import { route } from '../src/router.js';
+
+test('splitModelEffort - parses @effort suffix and prefers entry effort', () => {
+  assert.deepStrictEqual(splitModelEffort('ollama/qwen3.5:4b@off'), { model: 'ollama/qwen3.5:4b', effort: 'off' });
+  assert.deepStrictEqual(splitModelEffort('ollama/qwen3.5:4b@none'), { model: 'ollama/qwen3.5:4b', effort: 'none' });
+  assert.deepStrictEqual(splitModelEffort('ollama/qwen3.5:4b', 'off'), { model: 'ollama/qwen3.5:4b', effort: 'off' });
+  assert.deepStrictEqual(splitModelEffort('ollama/qwen3.5:4b@none', 'off'), { model: 'ollama/qwen3.5:4b', effort: 'off' });
+  assert.deepStrictEqual(splitModelEffort('ollama/qwen2.5:3b-instruct'), { model: 'ollama/qwen2.5:3b-instruct', effort: null });
+});
+
+test('formatArenaInvocation - builds cell@effort and lean flag', () => {
+  const inv = formatArenaInvocation({
+    harness: 'pi',
+    model: 'ollama/qwen3.5:4b',
+    effort: 'off',
+    lean_prompt: true
+  });
+  assert.strictEqual(inv.cell, 'pi:ollama/qwen3.5:4b@off');
+  assert.deepStrictEqual(inv.flags, ['--lean-prompt', '-e off']);
+  assert.ok(inv.argv.includes('--lean-prompt'));
+  assert.ok(inv.argv.includes('pi:ollama/qwen3.5:4b@off'));
+});
+
+test('2026-10-08 map - high routes prefer pi granite with effort=off + lean', async () => {
+  const caps = await loadCapabilities();
+  const r = findLive(caps, 'tiny_code_snippet', 'high');
+  assert.ok(r, 'should find a high route');
+  assert.strictEqual(r.harness, 'pi');
+  assert.strictEqual(r.baseModel, 'ollama/granite4.2:3b');
+  assert.strictEqual(r.effort, 'off');
+  assert.strictEqual(r.lean_prompt, true);
+  assert.strictEqual(r.confidence, 'high');
+});
+
+test('2026-10-08 map - qwen3.5 on little-coder is medium (capped pending #17)', async () => {
+  const caps = await loadCapabilities();
+  // Only the LC qwen entry: it must not route at high, and must route at medium.
+  const lcOnly = { ...caps, entries: caps.entries.filter((e) => e.harness === 'little-coder' && e.model === 'ollama/qwen3.5:4b') };
+  for (const tt of ['tiny_code_snippet', 'extract_structured', 'rewrite_short_prose']) {
+    assert.strictEqual(findLive(lcOnly, tt, 'high'), null, `${tt}: LC qwen3.5 must not auto-route at high`);
+    const m = findLive(lcOnly, tt, 'medium');
+    assert.ok(m && m.confidence === 'medium' && m.effort === 'off', `${tt}: LC qwen3.5 routes at medium with effort=off`);
+  }
+
+  // At medium threshold the LC qwen entry exists and carries the cap note.
+  const lc = caps.entries.find((e) => e.harness === 'little-coder' && e.model === 'ollama/qwen3.5:4b');
+  assert.ok(lc);
+  assert.ok(lc.task_types.every((t) => t.confidence === 'medium'));
+  assert.ok(/harness-arena.*#17|landing-path/i.test(lc.notes));
+  assert.strictEqual(lc.effort, 'off');
+  assert.strictEqual(lc.lean_prompt, true);
+});
+
+test('2026-10-08 map - baseline LC and minicpm stay weak', async () => {
+  const caps = await loadCapabilities();
+  const baseline = caps.entries.find((e) => e.harness === 'little-coder' && e.model === 'ollama/qwen2.5:3b-instruct');
+  assert.ok(baseline.not_suitable.includes('extract_structured'));
+  assert.ok(baseline.not_suitable.includes('rewrite_short_prose'));
+  assert.strictEqual(baseline.task_types.find((t) => t.id === 'tiny_code_snippet').confidence, 'provisional');
+
+  const miniLc = caps.entries.find((e) => e.harness === 'little-coder' && e.model === 'ollama/minicpm5-2b-16k:2b');
+  assert.ok(miniLc.not_suitable.includes('*') || miniLc.task_types.length === 0);
+
+  const ocQwen = caps.entries.find((e) => e.harness === 'opencode' && e.model === 'ollama/qwen3.5:4b@none');
+  assert.ok(ocQwen.not_suitable.includes('*'));
+});
+
+test('route() dry-run surfaces cell@off and lean_prompt for promoted models', async () => {
+  const result = await route('Write a fizz(n) function in Python that returns Fizz for multiples of 3', {
+    taskType: 'tiny_code_snippet',
+    dryRun: true
+  });
+  assert.ok(result.route);
+  assert.strictEqual(result.route.effort, 'off');
+  assert.strictEqual(result.route.lean_prompt, true);
+  assert.ok(result.route.cell.endsWith('@off'));
+  assert.ok(result.route.flags.includes('--lean-prompt'));
+  assert.ok(result.route.flags.includes('-e off'));
+});
+
+test('2026-10-08 map - pi qwen3.5 route carries thinking-off requirement', async () => {
+  const caps = await loadCapabilities();
+  const piQwen = { ...caps, entries: caps.entries.filter((e) => e.harness === 'pi' && e.model === 'ollama/qwen3.5:4b') };
+  for (const tt of ['tiny_code_snippet', 'extract_structured', 'rewrite_short_prose']) {
+    const r = findLive(piQwen, tt, 'high');
+    assert.ok(r, `${tt}: pi qwen3.5 is high`);
+    assert.strictEqual(r.effort, 'off', 'thinking must be off');
+    assert.strictEqual(formatArenaInvocation(r).cell, 'pi:ollama/qwen3.5:4b@off');
+  }
+});
