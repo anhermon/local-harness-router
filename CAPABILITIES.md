@@ -1,6 +1,6 @@
 # Capability Map
 
-**Last Updated**: 2026-10-08T22:45:00+03:00
+**Last Updated**: 2026-10-08T23:15:00+03:00
 
 **NOTE**: Promoted / provisional task-type rows cite harness-arena run IDs (dogfood evidence; see `evidence/`). Rows without evidence render as pending. Further **high** promotions still require the quality bar (PASS ≥ 0.9, ≥2 runs, human review, objective check). `provisional` = promote-with-notes; ranks below medium (not auto-routed at `require_confidence: high` or `medium`).
 
@@ -62,15 +62,15 @@
 
 **Required run flags**: `effort: off`, `--lean-prompt`
 
-2026-10-08: content is high-quality (objective 9/9) but arena confinement falsely fails remapped absolute paths. Rated medium and capped there until harness-arena landing-path confinement (#17) lands; then re-rate toward high. Always use effort=off and --lean-prompt.
+Raised medium→high on 2026-10-08 after harness-arena #17 (fccad9d) changed cell confinement to judge where a write landed. Replaying the 9 bench cells under merged master d44b94d: obj 9/9, arena 9/9, 0 escapes, host paths absent. That matches granite4.2:3b (9/9) and beats pi+qwen3.5:4b (8/9). The rating needs an arena with landing-path confinement (>= fccad9d); older arenas falsely fail these cells. Listed after pi+granite, so it only wins when that pair is unavailable. Always use effort=off and --lean-prompt.
 
 #### Task Types
 
 | Task Type | Confidence | Evidence | Notes |
 |-----------|------------|----------|-------|
-| `tiny_code_snippet` | medium | [20261008-203743](../runs/20261008-203743), [20261008-210624](../runs/20261008-210624), [20261008-212857](../runs/20261008-212857) | 2026-10-08 obj 3/3; arena 0/3 on cell-confinement because the model requests /fizz.py-style absolute paths that little-coder remaps into the cell (host /fizz.py does not exist). Capped at medium until harness-arena landing-path confinement (PR #17) lands; then re-rate toward high. Require effort=off and --lean-prompt. |
-| `extract_structured` | medium | [20261008-203856](../runs/20261008-203856), [20261008-210740](../runs/20261008-210740), [20261008-213025](../runs/20261008-213025) | 2026-10-08 obj 3/3; arena 0/3 same confinement false-positive. Medium until harness-arena #17. Require effort=off and --lean-prompt. |
-| `rewrite_short_prose` | medium | [20261008-203932](../runs/20261008-203932), [20261008-210816](../runs/20261008-210816), [20261008-213101](../runs/20261008-213101) | 2026-10-08 obj 3/3, arena 2/3 (one confinement miss). Medium until harness-arena #17. Require effort=off and --lean-prompt. |
+| `tiny_code_snippet` | high | [20261008-203743](../runs/20261008-203743), [20261008-210624](../runs/20261008-210624), [20261008-212857](../runs/20261008-212857), [20261008-225605](../runs/20261008-225605) | Obj 3/3; arena 3/3 under harness-arena@d44b94d. The model asks for /fizz.py and little-coder writes <cell>/fizz.py. The arena now checks the landing path (#17), so these runs pass. Live re-run 20261008-225605 also PASSed 1.00. Require effort=off and --lean-prompt. |
+| `extract_structured` | high | [20261008-203856](../runs/20261008-203856), [20261008-210740](../runs/20261008-210740), [20261008-213025](../runs/20261008-213025) | Obj 3/3; arena 3/3 under d44b94d (remapped /result.json, /SOLUTION.md). Require effort=off and --lean-prompt. |
+| `rewrite_short_prose` | high | [20261008-203932](../runs/20261008-203932), [20261008-210816](../runs/20261008-210816), [20261008-213101](../runs/20261008-213101) | Obj 3/3; arena 3/3 under d44b94d (210816 remapped /rewrite.md). Require effort=off and --lean-prompt. |
 
 ### opencode:ollama/qwen2.5:3b-instruct
 

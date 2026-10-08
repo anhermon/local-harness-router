@@ -113,8 +113,12 @@ async function executeRoute(prompt, route, config) {
     };
   }
 
-  const flagNote = inv.flags.length
-    ? `\nRequired flags for this route (from the capability entry): ${inv.flags.join(' ')}`
+  const required = [
+    ...(inv.effort ? [`effort ${inv.effort} (as @${inv.effort} in the cell)`] : []),
+    ...inv.flags
+  ];
+  const flagNote = required.length
+    ? `\nRequired for this route (from the capability entry): ${required.join(', ')}`
     : '';
 
   // In v0, we don't actually execute - just provide instructions that apply effort/lean.

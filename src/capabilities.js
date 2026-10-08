@@ -49,8 +49,8 @@ export function formatArenaInvocation(route) {
     ? `${route.harness}:${baseModel}@${effort}`
     : `${route.harness}:${baseModel}`;
   const flags = [];
+  // Effort is carried by the cell's @effort suffix (arena parses it); don't repeat it as -e.
   if (route.lean_prompt) flags.push("--lean-prompt");
-  if (effort) flags.push(`-e ${effort}`);
   return {
     cell,
     model: baseModel,
