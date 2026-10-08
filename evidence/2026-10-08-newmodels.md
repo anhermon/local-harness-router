@@ -59,5 +59,5 @@ Supporting evidence:
 - Live re-run `20261008-225605` on a scratch #17+#18 arena (real little-coder, 16k): **PASS 1.00**, `remappedWrites` = `/fizz.py`, `/SOLUTION.md`. Run data is in Dogfooding's `lhr-newmodels-lgtm-2026-10-08/runs-real/`.
 - Host `/fizz.py`, `/SOLUTION.md`, `/result.json` and `/rewrite.md` are absent.
 
-Caveat: the rating requires harness-arena ≥ `fccad9d`. Older arenas falsely fail these cells.
+Caveat: the rating requires harness-arena ≥ `d44b94d`. Arenas before #17 (`fccad9d`) falsely fail these cells, and before #18 (`d44b94d`) little-coder has no `ollama/qwen3.5:4b` entry in `little-coder-models.json`.
 

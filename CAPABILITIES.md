@@ -62,7 +62,7 @@
 
 **Required run flags**: `effort: off`, `--lean-prompt`
 
-Raised medium→high on 2026-10-08 after harness-arena #17 (fccad9d) changed cell confinement to judge where a write landed. Replaying the 9 bench cells under merged master d44b94d: obj 9/9, arena 9/9, 0 escapes, host paths absent. That matches granite4.2:3b (9/9) and beats pi+qwen3.5:4b (8/9). The rating needs an arena with landing-path confinement (>= fccad9d); older arenas falsely fail these cells. Listed after pi+granite, so it only wins when that pair is unavailable. Always use effort=off and --lean-prompt.
+Raised medium→high on 2026-10-08 after harness-arena #17 (fccad9d) changed cell confinement to judge where a write landed. Replaying the 9 bench cells under merged master d44b94d: obj 9/9, arena 9/9, 0 escapes, host paths absent. That matches granite4.2:3b (9/9) and beats pi+qwen3.5:4b (8/9). The rating needs harness-arena >= d44b94d: #17 (fccad9d) for landing-path confinement (older arenas falsely fail these cells) and #18 (d44b94d) to register qwen3.5:4b in little-coder-models.json. Listed last of the four high entries (after pi+granite, pi+qwen3.5, LC+granite), so it only routes when those are unavailable. Always use effort=off and --lean-prompt.
 
 #### Task Types
 
