@@ -219,7 +219,7 @@
         }
       ],
       "not_suitable": [],
-      "notes": "2026-10-26 new-model bench: pi+K2-Horizon-7B (Q4_K_M) is high on all three tasks with effort=off and --lean-prompt. Uses 8.4 GB when loaded (39/61 CPU/GPU): load it on its own, not alongside granite/qwen. Needs Ollama >= 0.40.4 (benched on 0.40.11). No thinking capability (-e off harmless). Model in ~/.pi/agent/models.json."
+      "notes": "2026-10-26 new-model bench: pi+K2-Horizon-7B (Q4_K_M) is high on all three tasks with effort=off and --lean-prompt. Uses 8.4 GB when loaded (39/61 CPU/GPU): load it on its own, not alongside granite/qwen. Needs Ollama >= 0.40.4 (benched on 0.40.11). No thinking capability (-e off harmless). The bench registered the model in a bench-only pi models.json; ~/.pi/agent/models.json must list hf.co/IFM/K2-Horizon-7B-GGUF:Q4_K_M before this route works."
     },
     {
       "harness": "little-coder",
@@ -291,7 +291,7 @@
       "not_suitable": [
         "rewrite_short_prose"
       ],
-      "notes": "2026-10-26 new-model bench: high on tiny_code and extract; rewrite is not_suitable because the model emits its tool calls as text and writes no files. Only BF16 is published (8.6 GB, 100% CPU on this box, about 4.6 tok/s)."
+      "notes": "2026-10-26 new-model bench: high on tiny_code and extract; rewrite is not_suitable because the model emits its tool calls as text and writes no files. Only BF16 is published (8.6 GB, 100% CPU on this box, about 4.6 tok/s). The bench registered the model in a bench-only pi models.json; ~/.pi/agent/models.json must list SparkLLM/Spark-X2.6-4B before this route works."
     },
     {
       "harness": "little-coder",

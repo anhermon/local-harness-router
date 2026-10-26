@@ -33,7 +33,7 @@ Run IDs are `20261026-` + six digits and are listed per task on each capability 
 - New entries are listed after the 2026-10-08 entries, so routing for existing task types is unchanged (pi+granite4.2:3b still selected first).
 - **K2-Horizon-7B uses 8.4 GB loaded** (39/61 CPU/GPU) versus 3.8/4.2 GB for granite/qwen: load it on its own. It needs Ollama ≥ 0.40.4 (benched on 0.40.11).
 - **Spark-X2.6-4B** is only published as BF16 (8.6 GB, 100% CPU on this box, about 4.6 tok/s). Not a daily driver.
-- **little-coder routes for both models** need the model listed in harness-arena's `little-coder-models.json`; the bench used a bench-only copy.
+- **Both harnesses** need the model registered before these routes work: in `~/.pi/agent/models.json` for pi, and in harness-arena's `little-coder-models.json` for little-coder. The bench used bench-only copies of both.
 
 ## Not benched
 
