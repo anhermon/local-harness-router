@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-10-08T23:15:00+03:00",
+  "updated_at": "2026-10-26T11:45:00+02:00",
   "source": "dogfood-evidence",
   "arena": {
     "url": "http://127.0.0.1:5190",
@@ -180,6 +180,158 @@
       ],
       "not_suitable": [],
       "notes": "Raised medium→high on 2026-10-08 after harness-arena #17 (fccad9d) changed cell confinement to judge where a write landed. Replaying the 9 bench cells under merged master d44b94d: obj 9/9, arena 9/9, 0 escapes, host paths absent. That matches granite4.2:3b (9/9) and beats pi+qwen3.5:4b (8/9). The rating needs harness-arena >= d44b94d: #17 (fccad9d) for landing-path confinement (older arenas falsely fail these cells) and #18 (d44b94d) to register qwen3.5:4b in little-coder-models.json. Listed last of the four high entries (after pi+granite, pi+qwen3.5, LC+granite), so it only routes when those are unavailable. Always use effort=off and --lean-prompt."
+    },
+    {
+      "harness": "pi",
+      "model": "ollama/hf.co/IFM/K2-Horizon-7B-GGUF:Q4_K_M",
+      "effort": "off",
+      "lean_prompt": true,
+      "task_types": [
+        {
+          "id": "tiny_code_snippet",
+          "confidence": "high",
+          "evidence": [
+            "20261026-105610",
+            "20261026-110845",
+            "20261026-111444"
+          ],
+          "notes": "2026-10-26 3/3 obj+arena (20-65 s). Require effort=off and --lean-prompt."
+        },
+        {
+          "id": "extract_structured",
+          "confidence": "high",
+          "evidence": [
+            "20261026-105651",
+            "20261026-110950",
+            "20261026-111504"
+          ],
+          "notes": "2026-10-26 3/3 obj+arena. Require effort=off and --lean-prompt."
+        },
+        {
+          "id": "rewrite_short_prose",
+          "confidence": "high",
+          "evidence": [
+            "20261026-105747",
+            "20261026-111038",
+            "20261026-111528"
+          ],
+          "notes": "2026-10-26 3/3 obj+arena. Output can contain a placeholder: 111528 starts \"Dear [Name],\" (passes the check). Review before sending."
+        }
+      ],
+      "not_suitable": [],
+      "notes": "2026-10-26 new-model bench: pi+K2-Horizon-7B (Q4_K_M) is high on all three tasks with effort=off and --lean-prompt. Uses 8.4 GB when loaded (39/61 CPU/GPU): load it on its own, not alongside granite/qwen. Needs Ollama >= 0.40.4 (benched on 0.40.11). No thinking capability (-e off harmless). The bench registered the model in a bench-only pi models.json; ~/.pi/agent/models.json must list hf.co/IFM/K2-Horizon-7B-GGUF:Q4_K_M before this route works."
+    },
+    {
+      "harness": "little-coder",
+      "model": "ollama/hf.co/IFM/K2-Horizon-7B-GGUF:Q4_K_M",
+      "effort": "off",
+      "lean_prompt": true,
+      "task_types": [
+        {
+          "id": "tiny_code_snippet",
+          "confidence": "high",
+          "evidence": [
+            "20261026-105819",
+            "20261026-111139",
+            "20261026-111621"
+          ],
+          "notes": "2026-10-26 3/3 obj+arena (69-93 s). Require effort=off and --lean-prompt."
+        },
+        {
+          "id": "extract_structured",
+          "confidence": "medium",
+          "evidence": [
+            "20261026-105952",
+            "20261026-111255",
+            "20261026-111729"
+          ],
+          "notes": "2026-10-26 obj 3/3, but 105952 wrote correct result.json + SOLUTION.md and then ran to the 480 s cell timeout (status failed). Medium, not high, for that timeout edge. Require effort=off and --lean-prompt."
+        },
+        {
+          "id": "rewrite_short_prose",
+          "confidence": "high",
+          "evidence": [
+            "20261026-110753",
+            "20261026-111351",
+            "20261026-111813"
+          ],
+          "notes": "2026-10-26 3/3 obj+arena (52 s each). Require effort=off and --lean-prompt."
+        }
+      ],
+      "not_suitable": [],
+      "notes": "2026-10-26 new-model bench. 8.4 GB loaded: run it single-resident. The bench registered the model in a bench-only little-coder-models.json; harness-arena's own little-coder-models.json must list hf.co/IFM/K2-Horizon-7B-GGUF:Q4_K_M before this route works. Always effort=off and --lean-prompt."
+    },
+    {
+      "harness": "pi",
+      "model": "ollama/SparkLLM/Spark-X2.6-4B",
+      "effort": "off",
+      "lean_prompt": true,
+      "task_types": [
+        {
+          "id": "tiny_code_snippet",
+          "confidence": "high",
+          "evidence": [
+            "20261026-101404",
+            "20261026-103421",
+            "20261026-104139"
+          ],
+          "notes": "2026-10-26 3/3 obj+arena (40-85 s). Require effort=off and --lean-prompt."
+        },
+        {
+          "id": "extract_structured",
+          "confidence": "high",
+          "evidence": [
+            "20261026-101452",
+            "20261026-103545",
+            "20261026-104219"
+          ],
+          "notes": "2026-10-26 3/3 obj+arena. Require effort=off and --lean-prompt."
+        }
+      ],
+      "not_suitable": [
+        "rewrite_short_prose"
+      ],
+      "notes": "2026-10-26 new-model bench: high on tiny_code and extract; rewrite is not_suitable because the model emits its tool calls as text and writes no files. Only BF16 is published (8.6 GB, 100% CPU on this box, about 4.6 tok/s). The bench registered the model in a bench-only pi models.json; ~/.pi/agent/models.json must list SparkLLM/Spark-X2.6-4B before this route works."
+    },
+    {
+      "harness": "little-coder",
+      "model": "ollama/SparkLLM/Spark-X2.6-4B",
+      "effort": "off",
+      "lean_prompt": true,
+      "task_types": [
+        {
+          "id": "tiny_code_snippet",
+          "confidence": "medium",
+          "evidence": [
+            "20261026-101557",
+            "20261026-103646",
+            "20261026-104332"
+          ],
+          "notes": "2026-10-26 3/3 obj+arena but slow (128-145 s): BF16 only, 100% CPU, about 4.6 tok/s. Medium for speed."
+        },
+        {
+          "id": "extract_structured",
+          "confidence": "medium",
+          "evidence": [
+            "20261026-101817",
+            "20261026-103910",
+            "20261026-104540"
+          ],
+          "notes": "2026-10-26 obj 3/3; 101817 wrote correct files then ran to the 480 s cell timeout (status failed)."
+        },
+        {
+          "id": "rewrite_short_prose",
+          "confidence": "low",
+          "evidence": [
+            "20261026-102618",
+            "20261026-104018",
+            "20261026-104657"
+          ],
+          "notes": "Provisional. 2026-10-26 2/3: 102618 hit the 480 s timeout with no file; 104018 and 104657 PASS. Do not auto-route."
+        }
+      ],
+      "not_suitable": [],
+      "notes": "2026-10-26 new-model bench: 8/9 objective but slow (BF16, CPU only). Not a daily driver. The bench registered the model in a bench-only little-coder-models.json; harness-arena's own file must list SparkLLM/Spark-X2.6-4B before this route works. Always effort=off and --lean-prompt."
     },
     {
       "harness": "opencode",
