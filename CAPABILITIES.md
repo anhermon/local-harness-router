@@ -1,6 +1,6 @@
 # Capability Map
 
-**Last Updated**: 2026-10-08T23:15:00+03:00
+**Last Updated**: 2026-10-26T11:45:00+02:00
 
 **NOTE**: Promoted / provisional task-type rows cite harness-arena run IDs (dogfood evidence; see `evidence/`). Rows without evidence render as pending. Further **high** promotions still require the quality bar (PASS ≥ 0.9, ≥2 runs, human review, objective check). `provisional` = promote-with-notes; ranks below medium (not auto-routed at `require_confidence: high` or `medium`).
 
@@ -71,6 +71,65 @@ Raised medium→high on 2026-10-08 after harness-arena #17 (fccad9d) changed cel
 | `tiny_code_snippet` | high | [20261008-203743](../runs/20261008-203743), [20261008-210624](../runs/20261008-210624), [20261008-212857](../runs/20261008-212857), [20261008-225605](../runs/20261008-225605) | Obj 3/3; arena 3/3 under harness-arena@d44b94d. The model asks for /fizz.py and little-coder writes <cell>/fizz.py. The arena now checks the landing path (#17), so these runs pass. Live re-run 20261008-225605 also PASSed 1.00. Require effort=off and --lean-prompt. |
 | `extract_structured` | high | [20261008-203856](../runs/20261008-203856), [20261008-210740](../runs/20261008-210740), [20261008-213025](../runs/20261008-213025) | Obj 3/3; arena 3/3 under d44b94d (remapped /result.json, /SOLUTION.md). Require effort=off and --lean-prompt. |
 | `rewrite_short_prose` | high | [20261008-203932](../runs/20261008-203932), [20261008-210816](../runs/20261008-210816), [20261008-213101](../runs/20261008-213101) | Obj 3/3; arena 3/3 under d44b94d (210816 remapped /rewrite.md). Require effort=off and --lean-prompt. |
+
+### pi:ollama/hf.co/IFM/K2-Horizon-7B-GGUF:Q4_K_M
+
+**Required run flags**: `effort: off`, `--lean-prompt`
+
+2026-10-26 new-model bench: pi+K2-Horizon-7B (Q4_K_M) is high on all three tasks with effort=off and --lean-prompt. Uses 8.4 GB when loaded (39/61 CPU/GPU): load it on its own, not alongside granite/qwen. Needs Ollama >= 0.40.4 (benched on 0.40.11). No thinking capability (-e off harmless). The bench registered the model in a bench-only pi models.json; ~/.pi/agent/models.json must list hf.co/IFM/K2-Horizon-7B-GGUF:Q4_K_M before this route works.
+
+#### Task Types
+
+| Task Type | Confidence | Evidence | Notes |
+|-----------|------------|----------|-------|
+| `tiny_code_snippet` | high | [20261026-105610](../runs/20261026-105610), [20261026-110845](../runs/20261026-110845), [20261026-111444](../runs/20261026-111444) | 2026-10-26 3/3 obj+arena (20-65 s). Require effort=off and --lean-prompt. |
+| `extract_structured` | high | [20261026-105651](../runs/20261026-105651), [20261026-110950](../runs/20261026-110950), [20261026-111504](../runs/20261026-111504) | 2026-10-26 3/3 obj+arena. Require effort=off and --lean-prompt. |
+| `rewrite_short_prose` | high | [20261026-105747](../runs/20261026-105747), [20261026-111038](../runs/20261026-111038), [20261026-111528](../runs/20261026-111528) | 2026-10-26 3/3 obj+arena. Output can contain a placeholder: 111528 starts "Dear [Name]," (passes the check). Review before sending. |
+
+### little-coder:ollama/hf.co/IFM/K2-Horizon-7B-GGUF:Q4_K_M
+
+**Required run flags**: `effort: off`, `--lean-prompt`
+
+2026-10-26 new-model bench. 8.4 GB loaded: run it single-resident. The bench registered the model in a bench-only little-coder-models.json; harness-arena's own little-coder-models.json must list hf.co/IFM/K2-Horizon-7B-GGUF:Q4_K_M before this route works. Always effort=off and --lean-prompt.
+
+#### Task Types
+
+| Task Type | Confidence | Evidence | Notes |
+|-----------|------------|----------|-------|
+| `tiny_code_snippet` | high | [20261026-105819](../runs/20261026-105819), [20261026-111139](../runs/20261026-111139), [20261026-111621](../runs/20261026-111621) | 2026-10-26 3/3 obj+arena (69-93 s). Require effort=off and --lean-prompt. |
+| `extract_structured` | medium | [20261026-105952](../runs/20261026-105952), [20261026-111255](../runs/20261026-111255), [20261026-111729](../runs/20261026-111729) | 2026-10-26 obj 3/3, but 105952 wrote correct result.json + SOLUTION.md and then ran to the 480 s cell timeout (status failed). Medium, not high, for that timeout edge. Require effort=off and --lean-prompt. |
+| `rewrite_short_prose` | high | [20261026-110753](../runs/20261026-110753), [20261026-111351](../runs/20261026-111351), [20261026-111813](../runs/20261026-111813) | 2026-10-26 3/3 obj+arena (52 s each). Require effort=off and --lean-prompt. |
+
+### pi:ollama/SparkLLM/Spark-X2.6-4B
+
+**Required run flags**: `effort: off`, `--lean-prompt`
+
+2026-10-26 new-model bench: high on tiny_code and extract; rewrite is not_suitable because the model emits its tool calls as text and writes no files. Only BF16 is published (8.6 GB, 100% CPU on this box, about 4.6 tok/s). The bench registered the model in a bench-only pi models.json; ~/.pi/agent/models.json must list SparkLLM/Spark-X2.6-4B before this route works.
+
+#### Task Types
+
+| Task Type | Confidence | Evidence | Notes |
+|-----------|------------|----------|-------|
+| `tiny_code_snippet` | high | [20261026-101404](../runs/20261026-101404), [20261026-103421](../runs/20261026-103421), [20261026-104139](../runs/20261026-104139) | 2026-10-26 3/3 obj+arena (40-85 s). Require effort=off and --lean-prompt. |
+| `extract_structured` | high | [20261026-101452](../runs/20261026-101452), [20261026-103545](../runs/20261026-103545), [20261026-104219](../runs/20261026-104219) | 2026-10-26 3/3 obj+arena. Require effort=off and --lean-prompt. |
+
+#### Not Suitable For
+
+- `rewrite_short_prose`
+
+### little-coder:ollama/SparkLLM/Spark-X2.6-4B
+
+**Required run flags**: `effort: off`, `--lean-prompt`
+
+2026-10-26 new-model bench: 8/9 objective but slow (BF16, CPU only). Not a daily driver. The bench registered the model in a bench-only little-coder-models.json; harness-arena's own file must list SparkLLM/Spark-X2.6-4B before this route works. Always effort=off and --lean-prompt.
+
+#### Task Types
+
+| Task Type | Confidence | Evidence | Notes |
+|-----------|------------|----------|-------|
+| `tiny_code_snippet` | medium | [20261026-101557](../runs/20261026-101557), [20261026-103646](../runs/20261026-103646), [20261026-104332](../runs/20261026-104332) | 2026-10-26 3/3 obj+arena but slow (128-145 s): BF16 only, 100% CPU, about 4.6 tok/s. Medium for speed. |
+| `extract_structured` | medium | [20261026-101817](../runs/20261026-101817), [20261026-103910](../runs/20261026-103910), [20261026-104540](../runs/20261026-104540) | 2026-10-26 obj 3/3; 101817 wrote correct files then ran to the 480 s cell timeout (status failed). |
+| `rewrite_short_prose` | low | [20261026-102618](../runs/20261026-102618), [20261026-104018](../runs/20261026-104018), [20261026-104657](../runs/20261026-104657) | Provisional. 2026-10-26 2/3: 102618 hit the 480 s timeout with no file; 104018 and 104657 PASS. Do not auto-route. |
 
 ### opencode:ollama/qwen2.5:3b-instruct
 
