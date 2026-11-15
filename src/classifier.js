@@ -44,6 +44,32 @@ const TASK_TYPE_PATTERNS = [
   }
 ];
 
+// Code-generation types are only routed for small, single-unit tasks. These
+// markers mean system-scale or multi-component work that a 3-4B local model
+// should not get with "high" confidence; the router then rejects by default.
+const CODE_TASK_TYPES = new Set(['tiny_code_snippet', 'unit_test_stub']);
+const OUT_OF_SCOPE_MARKERS = [
+  'distributed', 'microservice', 'microservices', 'production-ready', 'production ready',
+  'end-to-end', 'kubernetes', 'across the repo', 'across the codebase',
+  'across multiple', 'across three', 'across the', 'whole', 'entire', 'full rest api',
+  'database migrations', 'integration tests',
+  'key rotation', 'failover', 'architecture'
+];
+
+/**
+ * True when a code-generation prompt describes system-scale or
+ * multi-component work (a scale marker, or a list of 3+ components).
+ *
+ * @param {string} prompt
+ * @returns {boolean}
+ */
+export function isOutOfScopeCodeTask(prompt) {
+  if (OUT_OF_SCOPE_MARKERS.some(m => containsKeyword(prompt, m))) return true;
+  const commas = (prompt.match(/,/g) || []).length;
+  const ands = (prompt.match(/\band\b/gi) || []).length;
+  return commas + ands >= 3;
+}
+
 function escapeRegex(s) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
@@ -136,8 +162,9 @@ export function classifyPrompt(prompt) {
     }
   }
 
-  // Only return a match if we have reasonable confidence (base keyword hit)
-  return bestScore >= 3 ? bestMatch : null;
+  if (bestScore < 3) return null; // no base keyword hit
+  if (CODE_TASK_TYPES.has(bestMatch) && isOutOfScopeCodeTask(prompt)) return null;
+  return bestMatch;
 }
 
 /**

@@ -158,3 +158,22 @@ test('containsKeyword respects word boundaries', async () => {
   assert.strictEqual(containsKeyword('a js function', 'js'), true);
   assert.strictEqual(containsKeyword('use c++ here', 'c++'), true);
 });
+
+test('classifyPrompt - system-scale code tasks are not auto-routed', () => {
+  // Each of these used to classify as tiny_code_snippet (high confidence on a 3B model).
+  for (const p of [
+    'Implement a distributed rate limiter across three microservices using Redis with sliding windows and failover',
+    'Create a production-ready Kubernetes operator in Go that manages Postgres clusters with backups',
+    'Write a full REST API with authentication, database migrations and integration tests for our billing service',
+    'Implement end-to-end encryption for the chat app, including key rotation, across the iOS and Android clients',
+  ]) {
+    assert.strictEqual(classifyPrompt(p), null, p);
+  }
+});
+
+test('classifyPrompt - scope guard keeps small code tasks and non-code types', () => {
+  assert.strictEqual(classifyPrompt('Write a Python function that returns the nth Fibonacci number'), 'tiny_code_snippet');
+  assert.strictEqual(classifyPrompt('Write a function that returns the full name from first and last name'), 'tiny_code_snippet');
+  // The guard only applies to code-generation types.
+  assert.strictEqual(classifyPrompt('Explain what a microservice is'), 'explain_simple');
+});
