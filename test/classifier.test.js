@@ -177,3 +177,11 @@ test('classifyPrompt - scope guard keeps small code tasks and non-code types', (
   // The guard only applies to code-generation types.
   assert.strictEqual(classifyPrompt('Explain what a microservice is'), 'explain_simple');
 });
+
+test('classifyPrompt - ordinary small tasks are not rejected by the scope guard', () => {
+  // Bare "entire"/"whole"/"across the", and a 3-item parameter list, must stay in-scope.
+  assert.strictEqual(classifyPrompt('Write a Python function that returns the entire list of unique items'), 'tiny_code_snippet');
+  assert.strictEqual(classifyPrompt('Write a function that processes the whole array and returns its sum'), 'tiny_code_snippet');
+  assert.strictEqual(classifyPrompt('Write a function that maps a callback across the items in a list'), 'tiny_code_snippet');
+  assert.strictEqual(classifyPrompt('Write a function that takes name, age, and city and returns a greeting'), 'tiny_code_snippet');
+});

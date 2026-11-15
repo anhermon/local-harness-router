@@ -51,23 +51,21 @@ const CODE_TASK_TYPES = new Set(['tiny_code_snippet', 'unit_test_stub']);
 const OUT_OF_SCOPE_MARKERS = [
   'distributed', 'microservice', 'microservices', 'production-ready', 'production ready',
   'end-to-end', 'kubernetes', 'across the repo', 'across the codebase',
-  'across multiple', 'across three', 'across the', 'whole', 'entire', 'full rest api',
-  'database migrations', 'integration tests',
+  'across multiple', 'across three', 'across the web', 'across the iOS',
+  'full rest api', 'database migrations', 'integration tests',
   'key rotation', 'failover', 'architecture'
 ];
 
 /**
- * True when a code-generation prompt describes system-scale or
- * multi-component work (a scale marker, or a list of 3+ components).
+ * True when a code-generation prompt describes system-scale work
+ * (a scale marker). Bare words like "entire"/"whole"/"across the"
+ * are not markers — those show up in ordinary small tasks.
  *
  * @param {string} prompt
  * @returns {boolean}
  */
 export function isOutOfScopeCodeTask(prompt) {
-  if (OUT_OF_SCOPE_MARKERS.some(m => containsKeyword(prompt, m))) return true;
-  const commas = (prompt.match(/,/g) || []).length;
-  const ands = (prompt.match(/\band\b/gi) || []).length;
-  return commas + ands >= 3;
+  return OUT_OF_SCOPE_MARKERS.some(m => containsKeyword(prompt, m));
 }
 
 function escapeRegex(s) {
